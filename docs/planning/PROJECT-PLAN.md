@@ -1,166 +1,122 @@
 # Quorum Project Plan
 
 **Course:** SEN201  
-**Project:** Group 8 — Course Registration System  
+**Group:** 8  
 **Deadline:** 4 December 2026  
-**Planning baseline date:** 20 November 2026
+**Baseline:** 20 November 2026  
+**Governing specification:** [Shared project context](../QUORUM-CONTEXT.md)
 
-## 1. Problem and purpose
+## 1. Purpose
 
-Quorum is a small course-registration management application. It demonstrates how a student can select courses from a catalogue, submit a registration, receive validation feedback and review or amend the resulting registration.
-
-The system is an academic prototype. It is not intended to replace a university's actual student information system.
+Quorum is a Windows desktop course registration prototype built with C# and WPF. Students can register for courses. Teachers can create courses and inspect the students enrolled in their courses. The quorum rule determines whether each course is Open, Running or Full.
 
 ## 2. Scope
 
-### In scope for the MVP
-- Student records.
-- Course catalogue.
-- A registration associated with a student and academic term.
-- Adding and removing courses from a registration.
-- Duplicate-registration prevention.
-- Validation of configurable course-selection rules.
-- Calculation and display of total registered credit units.
-- Persistent local storage.
-- Clear success, validation and error feedback.
+### Student workflows
+- Create an account and log in.
+- Browse courses.
+- Register for a course.
+- View registered courses.
+- Drop a course.
 
-### Out of scope unless time and requirements permit
-- Authentication infrastructure and password recovery.
-- Payment processing.
-- Live integration with a university database or portal.
-- Timetable clash detection unless timetable data is available.
-- Lecturer approval workflows.
-- Multi-campus administration.
-- Production deployment, cloud hosting and concurrent multi-user access.
+### Teacher workflows
+- Create an account and log in.
+- Create a course with capacity and minimum-to-run values.
+- View the students enrolled in courses created by that teacher.
 
-## 3. Stakeholders and actors
+### Explicitly excluded from the promised SRS scope
+- Teachers viewing other teachers in a course.
+- Supabase storage (optional stretch only).
+- Email verification and password reset.
+- Payment, timetable management, university portal integration and approval workflows.
 
-- **Student:** browses the catalogue, registers for courses, reviews and amends their selection.
-- **Registration administrator/operator:** maintains student/course records and may inspect registrations in the prototype.
-- **Project team:** analyses, designs, implements and tests the application.
-- **Lecturer/assessor:** evaluates lifecycle evidence and the working application.
+Do not add extra features without an explicit team decision.
 
-Actor permissions are provisional and must be agreed in the SRS.
+## 3. Business rules
 
-## 4. Proposed functional requirements
+1. A student cannot register for the same course twice.
+2. Registration is rejected when enrolled count is greater than or equal to course capacity.
+3. A course is **Full** when enrolled count is greater than or equal to capacity.
+4. Otherwise, a course is **Running** when enrolled count is greater than or equal to MinToRun.
+5. Otherwise, the course is **Open**.
 
-| ID | Requirement |
+The order matters: Full takes precedence over Running when both thresholds are reached.
+
+## 4. Architecture
+
+The agreed design uses three layers:
+
+- **Quorum.UI:** WPF windows/views only. It must not contain business rules.
+- **Quorum.Logic:** account handling, registration validation and course quorum status.
+- **Quorum.Data:** data models, IDataStore contract and JsonDataStore implementation.
+- **Quorum.Tests:** automated unit tests for the Logic layer.
+
+The test project is separate from the three application layers. The optional Supabase implementation would implement the same IDataStore contract; the other layers should not need to change.
+
+## 5. Draft data contract
+
+| Type | Fields |
 |---|---|
-| FR-01 | The system shall create and display student records. |
-| FR-02 | The system shall create, view and update course records. |
-| FR-03 | The system shall display courses available for a selected term. |
-| FR-04 | The system shall create a registration for a student and term. |
-| FR-05 | The system shall add a course to a registration when validation succeeds. |
-| FR-06 | The system shall prevent the same course from being registered twice by the same student in the same term. |
-| FR-07 | The system shall calculate and display the registration's total credit units. |
-| FR-08 | The system shall allow a registered course to be removed, subject to configured rules. |
-| FR-09 | The system shall display a student's registered courses. |
-| FR-10 | The system shall preserve records after the application is closed and reopened. |
-| FR-11 | The system shall explain why a registration action is rejected. |
+| User | Id, FullName, Username, PasswordHash, Salt, Role |
+| Student : User | MatricNumber |
+| Course | Code, Title, Credits, Capacity, MinToRun, TeacherId |
+| Registration | StudentId, CourseCode, RegisteredAt |
 
-## 5. Proposed non-functional requirements
+IDataStore loads and saves users, courses and registrations. Treat this as the current draft contract; changes require team approval and an update to the shared context.
 
-| ID | Requirement |
-|---|---|
-| NFR-01 Usability | Menus, prompts and validation messages shall be clear and consistent. |
-| NFR-02 Reliability | Invalid input shall not corrupt or partially overwrite stored records. |
-| NFR-03 Maintainability | Presentation, business rules, domain entities and persistence shall be separated. |
-| NFR-04 Testability | Core registration rules shall be testable independently of the user interface. |
-| NFR-05 Data integrity | Student, course and registration identifiers shall be validated before records are saved. |
-| NFR-06 Portability | The application shall run on the agreed .NET runtime without machine-specific absolute paths. |
+## 6. Accounts and security
 
-## 6. Business rules and assumptions to validate
-
-These are **not confirmed institutional policies**. They must be agreed or replaced with verified values:
-- Whether registrations are limited by academic level, programme or department.
-- Minimum and maximum credit units.
-- Whether prerequisites are enforced, and where prerequisite data comes from.
-- Whether students may register for courses outside their level/programme.
-- Whether course capacity is enforced.
-- Whether add/drop deadlines or approval states are modelled.
-- Whether course codes are unique globally or within a term.
-
-For a working prototype, use a small documented sample dataset and configurable validation values. Never label assumptions as official university rules.
+- Accounts use username, salted password hash and role (Student or Teacher).
+- No email verification or password-reset flow is in scope.
+- Never commit API keys, credentials or other secrets.
+- Passwords must not be stored as plaintext. Use an established .NET password-hashing approach rather than inventing a cryptographic scheme.
 
 ## 7. Feasibility
 
 ### Technical
-Feasible as a C# local prototype using the .NET SDK, a local JSON data store and automated tests. No external university APIs are required.
+The project is feasible as a local Windows WPF application using C#, JSON persistence and a test project. The UI is separated from business rules, allowing the Logic layer to be tested independently.
 
 ### Operational
-The workflow is familiar and can be demonstrated with sample students and courses. An operator can maintain the catalogue and records.
+The student and teacher workflows are small and demonstrable using sample accounts and course records. The prototype does not claim integration with PAU's live student information systems.
 
 ### Schedule
-The time available is short (20 November to 4 December). Freeze the MVP early, implement essential workflows, and reserve the final days for integration, testing, report completion and demonstration.
+The delivery window is short. Prioritise the three increments, integrate frequently, and freeze features after 30 November. Supabase is strictly optional.
 
-## 8. Proposed architecture
+## 8. Risks
 
-Use a layered architecture:
+| Risk | Impact | Mitigation |
+|---|---|---|
+| Scope creep | High | Follow the shared context; freeze features on 30 November. |
+| JSON data loss or corruption | High | Validate before saving; test load/save and missing or malformed files. |
+| Incorrect duplicate/full/quorum logic | High | Put rules in Logic and cover boundary cases with unit tests. |
+| UI contains business rules | Medium | Keep WPF views thin and route actions through Logic. |
+| Uneven team contributions | High | Use named owners, GitHub issues and genuine member commits. |
+| Late integration | High | Agree interfaces early and integrate each increment. |
+| Secrets accidentally committed | High | Keep credentials out of source and review commits. |
+| Report/video delayed | High | Capture screenshots and testing evidence as features stabilise. |
 
-- **Presentation:** console menus and input/output.
-- **Application:** use cases such as RegisterForCourse, DropCourse and ViewRegistration.
-- **Domain:** Student, Course, Registration and registration rules.
-- **Infrastructure:** JSON repositories and file persistence.
-
-Dependencies should point inward. The domain layer should not depend on console input or JSON file details. Persistence should be accessed through repository interfaces.
-
-## 9. Proposed data model
-
-- **Student:** StudentId, FullName, Programme, Level.
-- **Course:** CourseCode, Title, CreditUnits, Term, optional Capacity, optional PrerequisiteCodes.
-- **Registration:** RegistrationId, StudentId, Term, Status, RegisteredCourseCodes.
-- **RegistrationItem:** RegistrationId, CourseCode, DateAdded.
-
-Use stable identifiers and validate references before saving. The final model may change after the SRS and class diagram are reviewed.
-
-## 10. Risks
-
-| Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|
-| Scope expands beyond available time | High | High | Freeze MVP; defer optional features. |
-| Team members contribute unevenly | High | High | Assign named, reviewable deliverables and track contributions. |
-| Requirements or institutional rules are unclear | Medium | High | Record assumptions and obtain lecturer/team confirmation. |
-| Integration conflicts | Medium | Medium | Agree interfaces early; use small branches and frequent integration. |
-| Data persistence defects | Medium | High | Test save/load and malformed/missing files. |
-| Diagrams and report are left until the end | High | High | Create lifecycle evidence alongside each phase. |
-| Team cannot explain AI-assisted code | Medium | High | Require a walkthrough and review for every submitted module. |
-
-## 11. Delivery schedule
+## 9. Incremental schedule
 
 | Date | Target |
 |---|---|
-| 20 Nov | Confirm scope, assumptions, team roles, workflow and toolchain. |
-| 21 Nov | Feasibility, project plan, stakeholder/actor analysis and SRS draft. |
-| 22 Nov | Validate requirements; use-case and activity diagrams. |
-| 23 Nov | Domain model, class diagram, sequence diagrams and architecture. |
-| 24 Nov | Solution scaffold, domain entities, repository interfaces and sample data. |
-| 25 Nov | Course catalogue and student-record workflows. |
-| 26 Nov | Registration workflow and duplicate/credit validation. |
-| 27 Nov | Drop/view workflows and persistence. |
-| 28 Nov | Unit tests and integration tests; fix defects. |
-| 29 Nov | System/acceptance scenarios; usability polish. |
-| 30 Nov | Feature freeze; full regression and report consolidation. |
-| 1 Dec | Screenshots, demonstration script and video recording. |
-| 2 Dec | Final report review, traceability and clean-build verification. |
-| 3 Dec | Buffer day; final fixes and submission checks. |
+| By 24 Nov | Increment 1: models, JSON storage, sign-up and login. |
+| By 28 Nov | Increment 2: course creation, student registration, duplicate/full/quorum rules. |
+| By 30 Nov | Increment 3: teacher enrolment view, validation, polish and unit tests. |
+| 30 Nov | Feature freeze. No new features after this date. |
+| 1 Dec | System and acceptance testing; record actual outcomes. |
+| 2–3 Dec | Demo video, screenshots, final PDF report and clean-build checks. |
 | 4 Dec | Submission deadline. |
 
-## 12. Definition of done
+Increment 4 is optional Supabase storage and must not jeopardise the core app.
 
-The project is ready when:
-- each in-scope requirement maps to an implemented feature and test;
-- the application builds and runs from a clean checkout;
-- valid and invalid registration scenarios have been demonstrated;
-- unit, integration, system and acceptance evidence is recorded;
-- required UML and architecture diagrams are included;
-- the report documents the actual process and team contributions;
-- screenshots and a working demonstration link are included; and
-- every team member can explain their contribution and the overall workflow.
+## 10. Definition of done
 
-## 13. Decisions still required
-
-1. Confirm whether the lecturer requires Console, WinForms, WPF or ASP.NET.
-2. Confirm whether the system should model only student-side registration or also administrator catalogue management.
-3. Confirm authoritative registration rules/data source, or approve clearly labelled prototype assumptions.
-4. Confirm team member names, GitHub usernames and responsibilities.
-5. Confirm whether any additional submission requirements were given verbally.
+- The application builds and runs from a clean checkout on Windows.
+- Students can complete the agreed account and registration workflows.
+- Teachers can create courses and view their own course enrolments.
+- Duplicate and full-course registration attempts are rejected.
+- Course status transitions correctly across Open, Running and Full boundaries.
+- JSON data survives application restarts.
+- Logic unit tests pass and actual test outcomes are recorded.
+- Required diagrams, report, screenshots and demo link are included.
+- Contributions are genuine and traceable.
