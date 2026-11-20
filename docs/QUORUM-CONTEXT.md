@@ -98,9 +98,9 @@ Keep the model simple and consistent with the three-layer structure. Do not sile
 
 - Follow this file. Do not change a decision unless told to; log approved changes.
 - Artifact ownership:
-  - **Claude:** architecture, core C# logic, debugging and review.
-  - **ChatGPT:** report prose, SRS wording and test tables.
-  - **Gemini:** diagrams as Mermaid or PlantUML text.
+  - **Claude:** architecture, core C# logic orchestration, debugging and review (ChatGPT may step in on code/logic when Claude hits usage limits).
+  - **ChatGPT:** report prose, SRS wording, test tables, implementing Gemini's UI designs in C# (WPF), and backup C# code implementation.
+  - **Gemini:** diagrams as Mermaid or PlantUML text, and UI design.
 - Do not rewrite files owned by another helper. Review and suggest instead.
 - Keep code simple, commented and compiling.
 - Do not invent library methods; say when unsure.
@@ -128,3 +128,4 @@ Then complete system and acceptance testing on 1 December, video and PDF on 2–
 
 - **2026-11-20:** Chose the name Quorum. Agreed WPF, local JSON by default, Supabase optional behind IDataStore, student and teacher scope, three-layer architecture, draft data contract and incremental schedule.
 - **2026-11-20:** Consolidated shared project context as the governing source of truth. Confirmed that earlier console, administrator and SQLite proposals are superseded.
+- **2026-11-20:** Updated AI helper roles: Gemini also owns UI design; ChatGPT also implements UI designs in C# (WPF) and serves as backup C# coder when Claude hits limits; Claude remains lead for logic orchestration, architecture, debugging, and review.

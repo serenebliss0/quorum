@@ -75,7 +75,7 @@ Supabase, if added, is a second `IDataStore` implementation. Nothing else change
 ## 7. Rules for AI helpers
 
 - Follow this file. Do not change a decision unless told to; log changes in the session log.
-- One owner per artifact. Claude: architecture, core C# logic, debugging and review. ChatGPT: report prose, SRS wording, test tables. Gemini: diagrams as Mermaid or PlantUML text.
+- One owner per artifact. Claude: architecture, core C# logic orchestration, debugging and review (ChatGPT may step in on code/logic when Claude hits usage limits). ChatGPT: report prose, SRS wording, test tables, implementing Gemini's UI designs in C# (WPF), and backup C# code. Gemini: diagrams as Mermaid or PlantUML text, and UI design.
 - Do not rewrite files you do not own. Review and suggest instead.
 - Keep code simple, commented, and compiling. Do not invent library methods; say when unsure.
 - Do not add features beyond Section 4.
@@ -99,3 +99,4 @@ Then: system and acceptance testing Dec 1, video and PDF Dec 2-3, submit Dec 4. 
 ## 10. Session log (append only)
 
 - 2026-11-20: Chose name quorum. Chose WPF, JSON default, Supabase optional behind `IDataStore`. Defined student and teacher scope. Created this file.
+- 2026-11-20: Updated AI helper roles: Gemini also owns UI design; ChatGPT also implements UI designs in C# (WPF) and serves as backup C# coder when Claude hits limits; Claude remains lead for logic orchestration, architecture, debugging, and review.
