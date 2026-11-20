@@ -52,15 +52,23 @@ All C# must compile and run without errors. Links must be publicly viewable.
 - Create courses, including capacity and minimum-to-run values.
 - View students enrolled in their courses.
 
+### Administrators can
+- Log in (provisioned account).
+- Browse all courses and create courses.
+- View students enrolled across all courses.
+- Configure minimum and maximum credit limits, individual course credit values, registration periods, academic policies and system settings.
+
 ### Business rules
 - A student cannot register for the same course twice.
 - A student cannot register for a course when enrolled count is greater than or equal to capacity.
+- Registrations must respect the configured credit limits and active registration period.
 - A course is **Running** once enrolled count is greater than or equal to its minimum-to-run value.
 - Course statuses are **Open**, **Running**, and **Full**. Full takes precedence when enrolled count reaches capacity; otherwise Running applies when the minimum-to-run threshold has been met; otherwise the status is Open.
 
-### Stretch features (do not promise these in the SRS)
+### Stretch / future features (do not promise these in the SRS)
 - Teachers viewing other teachers in a course.
 - Supabase storage.
+- External APIs and event-driven integrations (future possibilities outside the current MVP).
 
 Do not add features beyond this scope without an explicit team decision.
 
@@ -69,14 +77,14 @@ Do not add features beyond this scope without an explicit team decision.
 Three layers, with clear separation of concerns:
 
 - **Quorum.UI** (WPF): windows and views only; no business rules.
-- **Quorum.Logic**: registration rules, account handling and quorum status.
+- **Quorum.Logic**: registration rules, account handling, quorum status and academic policy enforcement.
 - **Quorum.Data**: data models, the IDataStore interface and JsonDataStore implementation.
 - **Quorum.Tests**: unit tests for the Logic layer.
 
 The test project is separate from the three application layers. Supabase, if implemented, is a second IDataStore implementation. Other layers should not need to change.
 
 ### Accounts
-- Username, salted password hash and role (Student or Teacher).
+- Username, salted password hash and role (Student, Teacher or Administrator; Administrator accounts are provisioned).
 - No email verification and no password-reset flow.
 
 ### Security
@@ -90,7 +98,8 @@ Update this contract when the team approves a change.
 - **Student : User:** MatricNumber.
 - **Course:** Code, Title, Credits, Capacity, MinToRun, TeacherId.
 - **Registration:** StudentId, CourseCode, RegisteredAt.
-- **IDataStore:** load and save users, courses and registrations.
+- **AcademicPolicy:** MinCredits, MaxCredits, RegistrationStart, RegistrationEnd, PolicySettings (draft; final fields to be confirmed in code).
+- **IDataStore:** load and save users, courses, registrations and academic policies/settings.
 
 Keep the model simple and consistent with the three-layer structure. Do not silently add fields or entities.
 
@@ -136,3 +145,4 @@ Then complete system and acceptance testing on 1 December, video and PDF on 2–
   registration periods and system settings. Confirmed
   external APIs and event-driven integrations as future
   possibilities outside the current MVP.
+- **2026-11-20:** Synced Sections 4, 5, and 6 of `QUORUM-CONTEXT.md` with the Administrator role, academic policy/credit-limit rules, and `PROJECT-REPORT.md`.
