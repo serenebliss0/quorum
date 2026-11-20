@@ -4,24 +4,26 @@
 **Group:** 8  
 **Deadline:** 4 December 2026
 
-## Members
+## Proposed members and roles
 
-| Member | Agreed role(s) | Deliverables | GitHub username |
-|---|---|---|---|
-| Oluwasemire Ajayi | Project lead, architecture and integration | Scope decisions, architecture, integration, final review and demo coordination | serenebliss0 |
-| Kenechukwu Okeke | To be agreed with member | To be agreed | |
-| Tochukwu Okike | To be agreed with member | To be agreed | |
+Confirm the proposed assignments with the members. Do not treat a proposed role as proof of completed contributions.
 
-Roles are proposed starting points, not claims about work already completed. Confirm responsibilities with each member.
+| Member | Proposed role | Main responsibility |
+|---|---|---|
+| AJAYI Oluwasemire (Serenity) | Project Manager and Lead C# Developer | Core logic, coordination and integration |
+| OKEKE Kenechukwu | Requirements Analyst and System Modeller | SRS and UML diagrams |
+| OKIKE Tochukwu | QA/Tester and UI Developer | WPF views, test plan and test cases |
+
+**Matriculation numbers:** TBD. Collect all three for the final report.
 
 ## Contribution log
 
-Record actual work, not planned work. Link commits, pull requests, diagrams, test results and report sections.
+Record actual work only. Link commits, pull requests, issues, diagrams, test evidence and report sections.
 
 | Date | Member | Contribution | Evidence |
 |---|---|---|---|
-| 20 Nov 2026 | | | |
+| | | | |
 
-## AI assistance disclosure / team practice
+## AI assistance and review
 
-AI tools may assist with brainstorming, drafting, code generation and review. The team must verify all output, understand the submitted implementation, and follow the lecturer's rules on AI use. Do not attribute AI-generated work to a human member as though they independently authored it.
+AI tools may assist with drafting, implementation and review, but the team must validate the output and understand the submitted work. Do not attribute AI-generated work to a human member as though they independently authored it. Follow the task ownership and file-boundary rules in [the shared project context](../QUORUM-CONTEXT.md).
