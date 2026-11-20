@@ -129,3 +129,10 @@ Then complete system and acceptance testing on 1 December, video and PDF on 2–
 - **2026-11-20:** Chose the name Quorum. Agreed WPF, local JSON by default, Supabase optional behind IDataStore, student and teacher scope, three-layer architecture, draft data contract and incremental schedule.
 - **2026-11-20:** Consolidated shared project context as the governing source of truth. Confirmed that earlier console, administrator and SQLite proposals are superseded.
 - **2026-11-20:** Updated AI helper roles: Gemini also owns UI design; ChatGPT also implements UI designs in C# (WPF) and serves as backup C# coder when Claude hits limits; Claude remains lead for logic orchestration, architecture, debugging, and review.
+- **2026-11-20**: Expanded Quorum's user model to three roles:
+  Student, Teacher and Administrator. Administrators have
+  full configuration authority over academic policies,
+  credit limits, individual course credit values,
+  registration periods and system settings. Confirmed
+  external APIs and event-driven integrations as future
+  possibilities outside the current MVP.
