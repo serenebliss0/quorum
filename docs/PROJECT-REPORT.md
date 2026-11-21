@@ -263,4 +263,631 @@ No new features will be introduced after 30 November 2026. Optional functionalit
 
 ---
 
-**End of Project Initiation and Planning Draft**
+## 8. SRS
+
+The system will provide the following major capabilities:
+
+- User account creation and authentication for Students and Teachers.
+- Administrator authentication through a provisioned administrator account.
+- Course creation and course browsing.
+- Student course registration, registration viewing, and course dropping.
+- Validation of duplicate registrations and course enrolment capacity.
+- Determination of course status based on enrolment and minimum enrolment requirements.
+- Teacher access to enrolment information for courses they created.
+- Administrator access to enrolment information across all courses.
+- Administrator configuration of academic policies, registration periods, system settings, and credit-load limits.
+- Administrator configuration of individual course credit values.
+- Local data persistence using JSON storage.
+
+The application will be developed using C# and Windows Presentation Foundation (WPF). Local JSON storage will serve as the default persistence mechanism. The architecture will allow for a possible alternative storage implementation, such as Supabase, if development time permits.
+
+The following are outside the scope of the current project:
+
+- Examination, grading, and academic result management.
+- School fee payment and financial management.
+- Attendance tracking.
+- General student information management beyond information required for course registration.
+- Integration with existing university portals or external institutional systems.
+- Public API development, webhook integrations, and WebSocket-based communication.
+- Multi-institution deployment and advanced institutional approval workflows.
+
+Quorum is intended to address course registration and enrolment management rather than serve as a complete university management system.
+
+### 1.3 Definitions, Acronyms and Abbreviations
+
+| Term | Definition |
+|---|---|
+| **Quorum** | The Course Registration System being developed by Group 8. |
+| **SRS** | Software Requirements Specification. |
+| **Student** | A registered system user who can browse, register for, and manage their course registrations. |
+| **Teacher** | A registered system user who can create courses and view enrolments for courses they created. |
+| **Administrator** | A provisioned system user with authority to configure academic policies and system settings. |
+| **Course** | An academic subject made available for student registration. |
+| **Course Registration** | The process through which a student enrols in an available course. |
+| **Enrolment Capacity** | The maximum number of students permitted to register for a course. |
+| **Minimum to Run (MinToRun)** | The minimum number of student registrations required for a course to be considered running. |
+| **Quorum (Threshold)** | The minimum enrolment threshold required for a course to run. |
+| **Credit Unit** | A numerical value assigned to a course to represent its academic credit weight. |
+| **Credit Load** | The total number of credit units accumulated by a student through registered courses. |
+| **Registration Period** | The period during which students are permitted to register for courses. |
+| **Add/Drop Deadline** | The configured deadline by which students may add or drop registered courses. |
+| **JSON** | JavaScript Object Notation, a lightweight data-interchange format used for local data storage. |
+| **WPF** | Windows Presentation Foundation, a framework used to develop the application's graphical user interface. |
+| **TBD** | To Be Determined; indicates information that has not yet been finalised. |
+
+# 2. Overall Description
+
+## 2.1 Product Perspective
+
+Quorum is a standalone Windows desktop application developed to support academic course registration and enrolment management.
+
+The system will operate as a self-contained application, with its user interface, application logic and data storage organised into separate components. This separation is intended to improve maintainability, support independent testing of business logic and allow the storage mechanism to be extended in the future.
+
+The proposed system will consist of three primary architectural components:
+
+- **Quorum.UI:** Responsible for the graphical user interface and interaction with users.
+- **Quorum.Logic:** Responsible for application operations, registration validation, account handling and enforcement of academic rules.
+- **Quorum.Data:** Responsible for data models, storage operations and persistence through the JSON-based data store.
+
+The application will initially store its records locally using JSON files. It will not depend on an existing university portal or external institutional database to perform its core functions.
+
+The architecture may accommodate an alternative data storage implementation in the future, but such an implementation is not required for the initial release.
+
+## 2.2 Product Functions
+
+Quorum will provide the following major functions:
+
+### 2.2.1 User Authentication
+
+- Allow Students and Teachers to create accounts.
+- Allow registered Students and Teachers to log in.
+- Authenticate users using their account credentials.
+- Provide Administrators with access through provisioned administrator accounts.
+- Restrict access to system functions according to the authenticated user's role.
+
+### 2.2.2 Course Management
+
+- Allow Teachers to create courses.
+- Allow Administrators to create courses.
+- Allow users to browse available courses.
+- Allow Teachers to specify course enrolment capacity and minimum enrolment requirements.
+- Allow Administrators to configure the credit value assigned to individual courses.
+
+### 2.2.3 Student Registration
+
+- Allow Students to register for available courses.
+- Prevent Students from registering for the same course more than once.
+- Prevent registration when a course has reached its enrolment capacity.
+- Enforce the configured academic credit-load limits.
+- Restrict registration to the permitted registration period.
+- Allow Students to view their registered courses.
+- Allow Students to drop registered courses within the permitted period.
+
+### 2.2.4 Enrolment Monitoring
+
+- Allow Teachers to view the students enrolled in courses they created.
+- Allow Administrators to view enrolments across all courses.
+- Determine course status based on the number of registered students, the minimum enrolment requirement and the course capacity.
+
+### 2.2.5 Academic Policy Configuration
+
+- Allow Administrators to configure the minimum and maximum permitted student credit loads.
+- Allow Administrators to configure individual course credit values.
+- Allow Administrators to configure registration opening and closing periods.
+- Allow Administrators to configure academic policies and registration constraints.
+- Allow Administrators to configure general system settings.
+
+## 2.3 User Classes and Characteristics
+
+Quorum will support three categories of users. Each category will have access to functionality appropriate to its responsibilities.
+
+### 2.3.1 Student
+
+Students are the primary users of the course registration functionality.
+
+Students will be able to:
+
+- Create an account and log in.
+- Browse available courses.
+- Register for courses that satisfy the system's registration rules.
+- View their registered courses.
+- Drop registered courses within the permitted period.
+
+Students will not have permission to create courses, view other students' registration records or modify academic policies.
+
+### 2.3.2 Teacher
+
+Teachers are responsible for creating and managing the courses they offer.
+
+Teachers will be able to:
+
+- Create an account and log in.
+- Browse available courses.
+- Create courses.
+- Specify course enrolment capacity and minimum enrolment requirements.
+- View the students enrolled in courses they created.
+
+Teachers will not have permission to register students for courses, manage student registrations or configure institution-wide academic policies.
+
+### 2.3.3 Administrator
+
+Administrators are responsible for managing the academic policies and general configuration of the system.
+
+Administrator accounts will be provisioned rather than created through the public account registration process.
+
+Administrators will be able to:
+
+- Log in using a provisioned administrator account.
+- Browse available courses.
+- Create courses.
+- View enrolments across all courses.
+- Configure global minimum and maximum credit-load limits.
+- Configure individual course credit values.
+- Configure registration periods and applicable deadlines.
+- Configure academic policies and registration constraints.
+- Manage general system settings.
+
+Administrators will have the highest level of configuration authority within the application.
+
+## 2.4 Operating Environment
+
+Quorum will operate within the following environment:
+
+| Component | Requirement |
+|---|---|
+| Operating System | Windows |
+| Programming Language | C# |
+| User Interface Framework | Windows Presentation Foundation (WPF) |
+| Development Platform | .NET |
+| Data Storage | Local JSON files |
+| Source Control | Git and GitHub |
+| Application Type | Desktop application |
+
+The application is intended to run on compatible Windows systems with the required .NET runtime or deployment dependencies installed.
+
+| Prefix | Meaning | First IDs |
+|---|---|---|
+| **FR** | Functional Requirements | Assigned in Section 3 |
+| **NFR** | Non-Functional Requirements | Assigned in Section 4 |
+| **IR** | Interface Requirements | Assigned in Section 5 |
+| **BR** | Business Rules | Assigned in Section 6 |
+| **CR** | Constraints | CR-TECH-001 onwards |
+| **AR** | Assumptions | AR-USER-001 onwards |
+
+## 2.5 Design and Implementation Constraints
+
+The development of Quorum will be subject to the following constraints:
+
+**CR-TECH-001: Platform Constraint**
+
+The initial application shall target Windows desktop environments and shall be developed using Windows Presentation Foundation (WPF).
+
+**CR-TECH-002: Programming Language Constraint**
+
+C# shall be used as the primary programming language, with .NET providing the application runtime.
+
+**CR-DATA-001: Storage Constraint**
+
+Local JSON files shall serve as the primary data persistence mechanism for the initial implementation.
+
+**CR-PROJ-001: Time Constraint**
+
+Development shall be completed within the agreed project schedule, with a submission deadline of 4 December 2026.
+
+**CR-SCOPE-001: Scope Constraint**
+
+Implementation shall be limited to the approved course registration and enrolment management functionality.
+
+**CR-SEC-001: Access Control Constraint**
+
+System operations shall be restricted according to the permissions assigned to Students, Teachers and Administrators.
+
+**CR-AUTH-001: Administrator Account Constraint**
+
+Administrator accounts shall be provisioned and shall not be created through the public account registration process.
+
+**CR-INT-001: Integration Constraint**
+
+The initial application shall operate independently and shall not require integration with external university systems.
+
+## 2.6 Assumptions and Dependencies
+
+The development and operation of Quorum are based on the following assumptions:
+
+**AR-USER-001: User Credentials**
+
+Students and Teachers will have valid account credentials before accessing their respective system functions.
+
+**AR-ADMIN-001: Administrator Provisioning**
+
+Administrator accounts will be provisioned before administrators access the application.
+
+**AR-COURSE-001: Course Information**
+
+Teachers will provide accurate course information, including course capacity and minimum enrolment requirements.
+
+**AR-POLICY-001: Academic Policy Configuration**
+
+Administrators will configure the academic policies and registration constraints that govern student registration.
+
+**AR-COURSE-002: Course Credit Configuration**
+
+Individual course credit values will be configured by Administrators.
+
+**AR-POLICY-002: Registration Validation**
+
+The system will use the configured registration periods and credit-load limits when validating student registration operations.
+
+**AR-DATA-001: Local Data Availability**
+
+The application will have access to its local data storage location when performing operations that require reading or saving records.
+
+**AR-ENV-001: Operating Environment**
+
+Users will operate the application within a compatible Windows environment.
+
+The system's initial operation will depend on the availability of its local JSON data files and the correct configuration of the application environment.
+
+# 3. Functional Requirements
+
+This section defines the functional requirements of the Quorum Course Registration System. These requirements describe the operations the system shall perform and the functionality it shall provide to Students, Teachers and Administrators.
+
+Each requirement is assigned a unique identifier to support traceability during system design, implementation and testing.
+
+The priority of each requirement is classified as follows:
+
+- **Must:** Essential functionality required for the initial system release.
+- **Should:** Desirable functionality that may be implemented if development time permits.
+
+## 3.1 User Authentication and Account Management
+
+### FR-AUTH-001: Student Account Creation
+
+**Description:** The system shall allow individuals to create Student accounts by providing the required registration information.
+
+**Actor:** Student
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- The system accepts valid account information.
+- The system rejects incomplete or invalid registration information.
+- The system prevents the creation of accounts using an existing username.
+- A successfully created account is saved to the system's data store.
+- The account is assigned the Student role.
+
+### FR-AUTH-002: Teacher Account Creation
+
+**Description:** The system shall allow individuals to create Teacher accounts by providing the required registration information.
+
+**Actor:** Teacher
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- The system accepts valid account information.
+- The system rejects incomplete or invalid registration information.
+- The system prevents the creation of accounts using an existing username.
+- A successfully created account is saved to the system's data store.
+- The account is assigned the Teacher role.
+
+### FR-AUTH-003: User Authentication
+
+**Description:** The system shall authenticate registered Students, Teachers and provisioned Administrators using their account credentials.
+
+**Actor:** Student, Teacher, Administrator
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- Users with valid credentials are granted access.
+- Users with invalid credentials are denied access.
+- The authenticated user's role is identified by the system.
+- Unauthenticated users cannot access protected system functionality.
+
+### FR-AUTH-004: Role-Based Access Control
+
+**Description:** The system shall restrict access to application functionality according to the authenticated user's assigned role.
+
+**Actor:** Student, Teacher, Administrator
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- Students can access only Student-authorised functionality.
+- Teachers can access only Teacher-authorised functionality.
+- Administrators can access Administrator-authorised functionality.
+- Users cannot perform operations reserved for other roles.
+
+## 3.2 Course Management and Browsing
+
+### FR-COURSE-001: Course Creation
+
+**Description:** The system shall allow authenticated Teachers and Administrators to create new courses by providing the required course information.
+
+**Actor:** Teacher, Administrator
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- Authenticated Teachers and Administrators can access the course creation function.
+- Required course information must be provided.
+- The system rejects incomplete or invalid course information.
+- The system prevents duplicate course codes.
+- Successfully created courses are saved to the data store.
+
+### FR-COURSE-002: Course Capacity Configuration
+
+**Description:** The system shall allow Teachers to specify the maximum enrolment capacity of courses they create.
+
+**Actor:** Teacher
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- The Teacher can specify a course capacity during course creation.
+- The specified capacity must be a valid positive value.
+- The system stores the configured capacity with the course information.
+- The capacity is used when validating student registration attempts.
+
+### FR-COURSE-003: Minimum Enrolment Configuration
+
+**Description:** The system shall allow Teachers to specify the minimum number of student registrations required for a course to run.
+
+**Actor:** Teacher
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- The Teacher can specify a minimum enrolment value during course creation.
+- The minimum enrolment value must be valid.
+- The configured minimum must not exceed the course capacity.
+- The system stores the configured value with the course information.
+
+### FR-COURSE-004: Course Browsing
+
+**Description:** The system shall allow authenticated Students, Teachers and Administrators to browse available courses and view their relevant information.
+
+**Actor:** Student, Teacher, Administrator
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- All three user roles can access the course browsing function.
+- The system displays available course information.
+- Course information includes its code, title, credit value, enrolment capacity and current enrolment status.
+- The system displays the course's current enrolment information.
+
+## 3.3 Student Course Registration
+
+### FR-REG-001: Course Registration
+
+**Description:** The system shall allow authenticated Students to register for available courses, provided that all applicable registration requirements are satisfied.
+
+**Actor:** Student
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- Only authenticated Students can register for courses.
+- The selected course must exist in the system.
+- The registration must satisfy the applicable registration rules.
+- A successful registration is saved to the data store.
+- The Student receives confirmation of a successful registration.
+
+### FR-REG-002: Duplicate Registration Prevention
+
+**Description:** The system shall prevent a Student from registering for a course in which they are already registered.
+
+**Actor:** Student
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- The system checks the Student's existing registrations before processing a new registration.
+- A duplicate registration attempt is rejected.
+- The system does not create an additional registration record.
+- The Student receives an appropriate notification.
+
+### FR-REG-003: Course Capacity Enforcement
+
+**Description:** The system shall prevent registration when the number of students registered for a course has reached its configured enrolment capacity.
+
+**Actor:** Student
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- The system checks the current enrolment count before accepting a registration.
+- Registration is rejected when the enrolment count is equal to or greater than the configured capacity.
+- The system does not exceed the configured course capacity.
+- The Student receives an appropriate notification when registration is rejected.
+
+### FR-REG-004: Credit Load Validation
+
+**Description:** The system shall validate a Student's registered credit load against the minimum and maximum credit-load limits configured by the Administrator.
+
+**Actor:** Student, Administrator
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- The system calculates the total credit value of a Student's registered courses.
+- The system retrieves the configured minimum and maximum credit-load limits.
+- The system uses these limits when validating the Student's registration load.
+- Registration operations that violate applicable credit-load restrictions are rejected.
+
+### FR-REG-005: Registration Period Enforcement
+
+**Description:** The system shall permit Students to register for courses only within the registration period configured by the Administrator.
+
+**Actor:** Student, Administrator
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- The system retrieves the configured registration opening and closing dates.
+- Registration is permitted within the configured period.
+- Registration attempts outside the permitted period are rejected.
+- The Student receives an appropriate notification when registration is unavailable.
+
+### FR-REG-006: View Registered Courses
+
+**Description:** The system shall allow Students to view the courses for which they are currently registered.
+
+**Actor:** Student
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- An authenticated Student can access their registration records.
+- The system displays only the registrations belonging to the authenticated Student.
+- The displayed information includes relevant course details.
+- The displayed records reflect successful registration and dropping operations.
+
+### FR-REG-007: Drop Registered Courses
+
+**Description:** The system shall allow Students to drop courses in which they are registered, subject to the configured add/drop deadline and applicable academic policies.
+
+**Actor:** Student, Administrator
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- A Student can select a course from their existing registrations.
+- The system verifies that the Student is registered for the selected course.
+- The system verifies that the applicable dropping period has not expired.
+- A successful drop removes the active registration.
+- The Student's current credit load and course enrolment count are updated accordingly.
+
+## 3.4 Course Enrolment Monitoring
+
+### FR-ENR-001: Teacher Enrolment Viewing
+
+**Description:** The system shall allow Teachers to view the Students registered in courses they created.
+
+**Actor:** Teacher
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- An authenticated Teacher can view enrolment information for their courses.
+- The system displays the Students registered in each selected course.
+- Teachers cannot access enrolment records belonging exclusively to courses created by other Teachers.
+
+### FR-ENR-002: Administrator Enrolment Viewing
+
+**Description:** The system shall allow Administrators to view enrolment information across all courses in the system.
+
+**Actor:** Administrator
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- An authenticated Administrator can access enrolment information for all courses.
+- The system displays the Students registered in the selected courses.
+- The Administrator can view the current enrolment count for each course.
+
+### FR-ENR-003: Automatic Course Status Determination
+
+**Description:** The system shall automatically determine the status of each course using its current enrolment count, minimum enrolment requirement and maximum enrolment capacity.
+
+**Actor:** System
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- A course is assigned **Open** status when its enrolment count is below its minimum enrolment requirement.
+- A course is assigned **Running** status when its enrolment count has reached its minimum enrolment requirement but remains below capacity.
+- A course is assigned **Full** status when its enrolment count reaches or exceeds capacity.
+- Full status takes precedence over the other statuses.
+- Course status is updated when the enrolment count changes.
+
+## 3.5 Academic Policy and System Configuration
+
+### FR-ADM-001: Credit Load Configuration
+
+**Description:** The system shall allow Administrators to configure the minimum and maximum credit-load limits applicable to Students.
+
+**Actor:** Administrator
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- An Administrator can view the current credit-load limits.
+- An Administrator can modify the minimum and maximum values.
+- The system validates the configured values.
+- The system rejects configurations where the minimum credit load exceeds the maximum credit load.
+- Updated values are saved and used during registration validation.
+
+### FR-ADM-002: Individual Course Credit Configuration
+
+**Description:** The system shall allow Administrators to configure the credit value assigned to individual courses.
+
+**Actor:** Administrator
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- An Administrator can select an existing course.
+- The Administrator can assign or modify its credit value.
+- The configured credit value must be valid.
+- Updated credit values are saved and used when calculating Student credit loads.
+
+### FR-ADM-003: Registration Period Configuration
+
+**Description:** The system shall allow Administrators to configure the opening and closing dates of the course registration period.
+
+**Actor:** Administrator
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- An Administrator can configure the registration opening date.
+- An Administrator can configure the registration closing date.
+- The system validates the configured dates.
+- The opening date must not occur after the closing date.
+- Updated registration periods are applied when validating Student registration attempts.
+
+### FR-ADM-004: Add/Drop Deadline Configuration
+
+**Description:** The system shall allow Administrators to configure the deadline by which Students may drop registered courses.
+
+**Actor:** Administrator
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- An Administrator can configure the add/drop deadline.
+- The system validates the configured deadline.
+- The configured deadline is used when processing Student course-dropping requests.
+- Dropping requests submitted after the permitted deadline are rejected.
+
+### FR-ADM-005: Academic Policy Configuration
+
+**Description:** The system shall allow Administrators to configure the academic policies and registration constraints supported by Quorum.
+
+**Actor:** Administrator
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- An Administrator can access the academic policy configuration function.
+- The system allows modification of supported academic policy settings.
+- The system validates policy configurations before saving them.
+- Updated policies are applied to relevant system operations.
+
+### FR-ADM-006: General System Configuration
+
+**Description:** The system shall allow Administrators to configure supported general system settings.
+
+**Actor:** Administrator
+
+**Priority:** Must
+
+**Acceptance Criteria:**
+- An Administrator can access the system configuration function.
+- Supported settings can be viewed and modified.
+- Invalid configurations are rejected.
+- Valid changes are saved and applied by the system.
+
