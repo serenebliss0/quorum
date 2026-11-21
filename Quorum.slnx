@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Quorum.Data/Quorum.Data.csproj" />
+    <Project Path="src/Quorum.Logic/Quorum.Logic.csproj" />
+    <Project Path="src/Quorum.UI/Quorum.UI.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Quorum.Tests/Quorum.Tests.csproj" />
+  </Folder>
+</Solution>
