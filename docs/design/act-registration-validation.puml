@@ -1,0 +1,37 @@
+@startuml
+title Quorum — Activity Diagram: Registration Validation Workflow
+!pragma useVerticalIf on
+start
+:Student initiates RegistrationService.Register(studentId, courseCode);
+
+if (PolicyService.IsRegistrationOpen(now)?) then (no)
+  :Return OperationResult(IsSuccess = false, Message);
+  stop
+else (yes)
+  if (Duplicate registration exists?) then (yes)
+    :Return OperationResult(IsSuccess = false, Message);
+    stop
+  else (no)
+    if (Course full? (enrolled >= Capacity)) then (yes)
+      :Return OperationResult(IsSuccess = false, Message);
+      stop
+    else (no)
+      if (Current credits + Course.Credits > MaxCredits?) then (yes)
+        :Return OperationResult(IsSuccess = false, Message);
+        stop
+      else (no)
+        :Create Registration(StudentId, CourseCode, RegisteredAt = now) and add to regs;
+        :IDataStore.SaveRegistrations(regs);
+        :CourseService.GetCourseStatus(courseCode)\n(Full if >= Capacity, Running if >= MinToRun, else Open);
+        :Return OperationResult(IsSuccess = true, Message);
+        if (RegistrationService.IsBelowMinCredits(studentId)?) then (yes)
+          :WpfViews shows confirmation + advisory MinCredits warning;
+        else (no)
+          :WpfViews shows registration confirmation;
+        endif
+      endif
+    endif
+  endif
+endif
+stop
+@enduml

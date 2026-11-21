@@ -891,3 +891,6 @@ The priority of each requirement is classified as follows:
 - Invalid configurations are rejected.
 - Valid changes are saved and applied by the system.
 
+## 9. UML Diagrams
+
+![alt text](image.png)

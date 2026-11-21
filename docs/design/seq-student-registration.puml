@@ -1,0 +1,65 @@
+@startuml
+title Quorum — Sequence Diagram: Student Course Registration
+autonumber
+
+actor Student
+participant "WpfViews" as UI
+participant "RegistrationService" as RegSvc
+participant "PolicyService" as PolSvc
+participant "CourseService" as CrsSvc
+participant "IDataStore" as Store
+
+Student -> UI : Select course & click Register
+UI -> RegSvc : Register(studentId, courseCode)
+RegSvc -> PolSvc : IsRegistrationOpen(now)
+PolSvc -> Store : LoadPolicy()
+Store --> PolSvc : policy
+PolSvc --> RegSvc : isOpen
+
+alt isOpen == false
+  RegSvc --> UI : OperationResult(IsSuccess = false, Message)
+  UI --> Student : Show period closed message
+else isOpen == true
+  RegSvc -> Store : LoadRegistrations()
+  Store --> RegSvc : regs
+
+  alt Duplicate registration exists
+    RegSvc --> UI : OperationResult(IsSuccess = false, Message)
+    UI --> Student : Show duplicate message
+  else Not already registered
+    RegSvc -> Store : LoadCourses()
+    Store --> RegSvc : courses
+    RegSvc -> RegSvc : Derive enrolled count for courseCode
+
+    alt Course full (enrolled >= Capacity)
+      RegSvc --> UI : OperationResult(IsSuccess = false, Message)
+      UI --> Student : Show course full message
+    else Seat available
+      RegSvc -> PolSvc : GetPolicy()
+      PolSvc -> Store : LoadPolicy()
+      Store --> PolSvc : policy
+      PolSvc --> RegSvc : policy
+      RegSvc -> RegSvc : Sum student credits + course.Credits
+
+      alt Total credits > policy.MaxCredits
+        RegSvc --> UI : OperationResult(IsSuccess = false, Message)
+        UI --> Student : Show MaxCredits exceeded message
+      else Within MaxCredits
+        RegSvc -> RegSvc : Create Registration(StudentId, CourseCode, RegisteredAt = now) and add to regs
+        RegSvc -> Store : SaveRegistrations(regs)
+        Store --> RegSvc : saved
+        RegSvc --> UI : OperationResult(IsSuccess = true, Message)
+        UI -> CrsSvc : GetCourseStatus(courseCode)
+        CrsSvc -> Store : LoadCourses()
+        Store --> CrsSvc : courses
+        CrsSvc -> Store : LoadRegistrations()
+        Store --> CrsSvc : regs
+        CrsSvc --> UI : CourseStatus (Open | Running | Full)
+        UI -> RegSvc : IsBelowMinCredits(studentId)
+        RegSvc --> UI : isBelowMin
+        UI --> Student : Show confirmation (+ MinCredits warning if true)
+      end
+    end
+  end
+end
+@enduml

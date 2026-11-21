@@ -1,0 +1,47 @@
+@startuml
+title Quorum — Sequence Diagram: Admin Credit Edit & Policy Save
+autonumber
+
+actor Administrator
+participant "WpfViews" as UI
+participant "CourseService" as CrsSvc
+participant "PolicyService" as PolSvc
+participant "IDataStore" as Store
+
+== Edit Course Credits ==
+Administrator -> UI : Open courses view
+UI -> CrsSvc : BrowseCourses()
+CrsSvc -> Store : LoadCourses()
+Store --> CrsSvc : courses
+CrsSvc --> UI : List<Course>
+
+Administrator -> UI : Edit Credits for courseCode
+UI -> CrsSvc : UpdateCourseCredits(actor, courseCode, credits)
+CrsSvc -> Store : LoadCourses()
+Store --> CrsSvc : courses
+
+alt Actor is not an Administrator, or course not found, or credits not a whole number from 1 to 6
+  CrsSvc --> UI : OperationResult(IsSuccess = false, Message)
+  UI --> Administrator : Show error message
+else Valid
+  CrsSvc -> CrsSvc : Set course.Credits = credits
+  CrsSvc -> Store : SaveCourses(courses)
+  Store --> CrsSvc : saved
+  CrsSvc --> UI : OperationResult(IsSuccess = true, Message)
+  UI --> Administrator : Refresh course list
+end
+
+== Save AcademicPolicy ==
+Administrator -> UI : Submit MinCredits, MaxCredits, Start, End
+UI -> PolSvc : SavePolicy(actor, policy)
+
+alt Actor is not an Administrator, or MinCredits < 0, or MaxCredits < MinCredits, or RegistrationEnd is not after RegistrationStart
+  PolSvc --> UI : OperationResult(IsSuccess = false, Message)
+  UI --> Administrator : Show error message
+else Valid
+  PolSvc -> Store : SavePolicy(policy)
+  Store --> PolSvc : saved
+  PolSvc --> UI : OperationResult(IsSuccess = true, Message)
+  UI --> Administrator : Show saved confirmation
+end
+@enduml

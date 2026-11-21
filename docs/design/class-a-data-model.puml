@@ -1,0 +1,82 @@
+@startuml
+title Quorum — Class Diagram (A: Data Model)
+top to bottom direction
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+package "Quorum.Data" {
+  enum Role {
+    Student
+    Teacher
+    Administrator
+  }
+
+  enum CourseStatus {
+    Open
+    Running
+    Full
+  }
+
+  class User {
+    +Id : string
+    +FullName : string
+    +Username : string
+    +PasswordHash : string
+    +Salt : string
+    +Role : Role
+  }
+
+  class Student {
+    +MatricNumber : string
+  }
+
+  class Course {
+    +Code : string
+    +Title : string
+    +Credits : int
+    +Capacity : int
+    +MinToRun : int
+    +TeacherId : string
+  }
+
+  note bottom of Course
+    New courses default to Credits = 3.
+    Only an Administrator can change credits.
+  end note
+
+  class Registration {
+    +StudentId : string
+    +CourseCode : string
+    +RegisteredAt : DateTime
+  }
+
+  class AcademicPolicy {
+    +MinCredits : int
+    +MaxCredits : int
+    +RegistrationStart : DateTime
+    +RegistrationEnd : DateTime
+  }
+
+  interface IDataStore {
+    +LoadUsers() : List<User>
+    +SaveUsers(users : List<User>) : void
+    +LoadCourses() : List<Course>
+    +SaveCourses(courses : List<Course>) : void
+    +LoadRegistrations() : List<Registration>
+    +SaveRegistrations(regs : List<Registration>) : void
+    +LoadPolicy() : AcademicPolicy
+    +SavePolicy(policy : AcademicPolicy) : void
+  }
+
+  class JsonDataStore {
+  }
+}
+
+Student --|> User
+User --> Role
+Course "0..*" --> "1" User : TeacherId
+Registration "0..*" --> "1" Student : StudentId
+Registration "0..*" --> "1" Course : CourseCode
+JsonDataStore ..|> IDataStore
+@enduml

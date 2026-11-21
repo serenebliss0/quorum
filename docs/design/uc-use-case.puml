@@ -1,0 +1,41 @@
+@startuml
+title Quorum — Use Case Diagram
+left to right direction
+skinparam packageStyle rectangle
+
+actor Student
+actor Teacher
+actor Administrator <<provisioned>>
+
+rectangle "Quorum Course Registration System" {
+  usecase "Create Account" as UC_SignUp
+  usecase "Log In" as UC_Login
+  usecase "Browse Courses" as UC_Browse
+  usecase "Register for Course" as UC_Register
+  usecase "View Registered Courses" as UC_ViewReg
+  usecase "Drop Course" as UC_Drop
+  usecase "Create Course" as UC_CreateCourse
+  usecase "View Own Course Enrolments" as UC_TeacherEnrol
+  usecase "Edit Course Credits" as UC_EditCredits
+  usecase "View All Course Enrolments" as UC_AdminEnrol
+  usecase "Configure Academic Policy" as UC_Policy
+}
+
+Student --> UC_SignUp
+Student --> UC_Login
+Student --> UC_Browse
+Student --> UC_Register
+Student --> UC_ViewReg
+Student --> UC_Drop
+
+Teacher --> UC_SignUp
+Teacher --> UC_Login
+Teacher --> UC_CreateCourse
+Teacher --> UC_TeacherEnrol
+
+Administrator --> UC_Login
+Administrator --> UC_Browse
+Administrator --> UC_EditCredits
+Administrator --> UC_AdminEnrol
+Administrator --> UC_Policy
+@enduml

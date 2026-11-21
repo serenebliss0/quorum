@@ -128,9 +128,9 @@ Then complete system and acceptance testing on 1 December, video and PDF on 2–
 
 ## 9. Current state
 
-- Repository exists; project name, WPF, C#, local JSON default, optional Supabase, scope and three-layer design are agreed.
-- Next steps: add this file to docs, each member makes a genuine first commit, create GitHub Issues from the incremental plan, and draft the SRS.
-- Matriculation numbers remain to be collected.
+- Solution scaffold committed and pushed (Quorum.slnx; src/Quorum.Data, Quorum.Logic, Quorum.UI; tests/Quorum.Tests). Builds on .NET 10.
+- Template placeholder files (Class1.cs, UnitTest1.cs) still to be replaced.
+- Next: Increment 1 code (models, IDataStore, JsonDataStore, AuthService, tests); system-modelling diagrams; GitHub Issues; matriculation numbers.
 - Do not report an item as completed unless there is evidence.
 
 ## 10. Session log (append only)
@@ -146,3 +146,8 @@ Then complete system and acceptance testing on 1 December, video and PDF on 2–
   external APIs and event-driven integrations as future
   possibilities outside the current MVP.
 - **2026-11-20:** Synced Sections 4, 5, and 6 of `QUORUM-CONTEXT.md` with the Administrator role, academic policy/credit-limit rules, and `PROJECT-REPORT.md`.
+- **2026-11-21:** Scaffolded and pushed the solution (.NET 10, WPF UI, xUnit tests, UI -> Logic -> Data references). WPF confirmed over Avalonia and WinForms. Removed duplicate docs/CONTEXT.md; this file is the single source of truth.
+- **2026-11-21:** Administrator role retained in the MVP. AcademicPolicy is limited to MinCredits, MaxCredits, RegistrationStart and RegistrationEnd. Only administrators can change course credits; teachers cannot set or edit them, and new courses start with a default of 3 credits. Admins browse courses, edit credit values, view enrolments across all courses and configure the AcademicPolicy. Registration is blocked outside the registration period or when MaxCredits would be exceeded; MinCredits is advisory (shown as a warning, not blocking). Increment 2 covers the credit and period rules; Increment 3 covers the admin screens.
+- **2026-11-21:** Logic-layer contract locked: methods that can fail by a business rule return OperationResult (IsSuccess, Message). Admin-only and teacher-only operations take an acting User and are enforced in the Logic layer (CreateCourse: Teacher; UpdateCourseCredits and SavePolicy: Administrator; GetCourseEnrolments: the course's teacher or an Administrator). New courses default to 3 credits.
+- **2026-11-21:** Validation rules: credits must be a whole number from 1 to 6 and the course must exist; AcademicPolicy requires MinCredits >= 0, MaxCredits >= MinCredits, and RegistrationEnd after RegistrationStart. Policy and credit changes apply to future registrations only; existing registrations are not re-checked.
+- **2026-11-21:** All UML diagrams accepted and stored in docs/design (use case, class A and B, three sequence diagrams, activity, architecture). Class diagram B method names are the locked Logic-layer contract. Next: Increment 1 code.

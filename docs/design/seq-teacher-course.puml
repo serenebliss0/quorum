@@ -1,0 +1,52 @@
+@startuml
+title Quorum — Sequence Diagram: Teacher Course Creation & Enrolments
+autonumber
+
+actor Teacher
+participant "WpfViews" as UI
+participant "CourseService" as CrsSvc
+participant "RegistrationService" as RegSvc
+participant "IDataStore" as Store
+
+== Create Course ==
+Teacher -> UI : Submit Code, Title, Capacity, MinToRun
+UI -> CrsSvc : CreateCourse(actor, code, title, capacity, minToRun)
+CrsSvc -> Store : LoadCourses()
+Store --> CrsSvc : courses
+
+alt Unauthorized actor or invalid/duplicate course
+  CrsSvc --> UI : OperationResult(IsSuccess = false, Message)
+  UI --> Teacher : Show error message
+else Valid
+  CrsSvc -> CrsSvc : Create Course(TeacherId = actor.Id, Credits = 3) and add to courses
+  CrsSvc -> Store : SaveCourses(courses)
+  Store --> CrsSvc : saved
+  CrsSvc --> UI : OperationResult(IsSuccess = true, Message)
+  UI -> CrsSvc : GetTeacherCourses(actor)
+  CrsSvc -> Store : LoadCourses()
+  Store --> CrsSvc : courses
+  CrsSvc --> UI : List<Course>
+  UI -> CrsSvc : GetCourseStatus(courseCode) (repeat for each course)
+  CrsSvc --> UI : CourseStatus (Open | Running | Full)
+  UI --> Teacher : Display updated courses with status
+end
+
+== View Enrolled Students ==
+Teacher -> UI : Select own course
+UI -> RegSvc : GetCourseEnrolments(actor, courseCode)
+RegSvc -> Store : LoadCourses()
+Store --> RegSvc : courses
+
+alt Actor is not this course's teacher and not an Administrator, or course not found
+  RegSvc --> UI : List<Student> (empty)
+  UI --> Teacher : Show "No students to display"
+else Authorized
+  RegSvc -> Store : LoadRegistrations()
+  Store --> RegSvc : regs
+  RegSvc -> Store : LoadUsers()
+  Store --> RegSvc : users
+  RegSvc -> RegSvc : Filter regs by courseCode and match to Student users
+  RegSvc --> UI : List<Student>
+  UI --> Teacher : Display enrolled students
+end
+@enduml

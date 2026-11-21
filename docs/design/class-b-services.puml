@@ -1,0 +1,88 @@
+@startuml
+title Quorum — Class Diagram (B: Layers and Services)
+top to bottom direction
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+package "Quorum.UI" {
+  class WpfViews <<WPF Views>> {
+    +RenderViews() : void
+  }
+}
+
+package "Quorum.Logic" {
+  class OperationResult {
+    +IsSuccess : bool
+    +Message : string
+  }
+
+  class AuthService {
+    -_store : IDataStore
+    +RegisterStudent(fullName, username, password, matricNo) : OperationResult
+    +RegisterTeacher(fullName, username, password) : OperationResult
+    +Login(username, password) : User
+  }
+
+  class CourseService {
+    -_store : IDataStore
+    +CreateCourse(actor : User, code, title, capacity, minToRun) : OperationResult
+    +BrowseCourses() : List<Course>
+    +GetTeacherCourses(actor : User) : List<Course>
+    +UpdateCourseCredits(actor : User, courseCode, credits) : OperationResult
+    +GetCourseStatus(courseCode) : CourseStatus
+  }
+
+  note top of CourseService
+    Admin-only and teacher-only operations are enforced
+    here via the actor parameter, not in the UI.
+  end note
+
+  class RegistrationService {
+    -_store : IDataStore
+    -_policyService : PolicyService
+    +Register(studentId, courseCode) : OperationResult
+    +Drop(studentId, courseCode) : OperationResult
+    +GetStudentRegistrations(studentId) : List<Registration>
+    +GetCourseEnrolments(actor : User, courseCode) : List<Student>
+    +IsBelowMinCredits(studentId) : bool
+  }
+
+  class PolicyService {
+    -_store : IDataStore
+    +GetPolicy() : AcademicPolicy
+    +SavePolicy(actor : User, policy : AcademicPolicy) : OperationResult
+    +IsRegistrationOpen(now : DateTime) : bool
+  }
+}
+
+package "Quorum.Data" {
+  enum CourseStatus {
+    Open
+    Running
+    Full
+  }
+
+  interface IDataStore
+  class JsonDataStore
+}
+
+WpfViews ..> AuthService
+WpfViews ..> CourseService
+WpfViews ..> RegistrationService
+WpfViews ..> PolicyService
+
+AuthService ..> OperationResult
+CourseService ..> OperationResult
+RegistrationService ..> OperationResult
+PolicyService ..> OperationResult
+
+CourseService ..> CourseStatus : derives
+RegistrationService --> PolicyService
+
+AuthService --> IDataStore
+CourseService --> IDataStore
+RegistrationService --> IDataStore
+PolicyService --> IDataStore
+JsonDataStore ..|> IDataStore
+@enduml
