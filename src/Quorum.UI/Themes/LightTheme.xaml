@@ -1,0 +1,26 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Core 5-Token Fluent Light Palette -->
+    <SolidColorBrush x:Key="BgMicaBrush" Color="#F3F5F8" />
+    <SolidColorBrush x:Key="BgSurfaceBrush" Color="#EBFFFFFF" />
+    <SolidColorBrush x:Key="BgSurfaceSolidBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="BgCanvasBrush" Color="#B8FFFFFF" />
+    <SolidColorBrush x:Key="BgSubtleBrush" Color="#EAEFF5" />
+    <SolidColorBrush x:Key="BorderHairlineBrush" Color="#DCE1EA" />
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#181B22" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#5A6374" />
+    <SolidColorBrush x:Key="TextOnAccentBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="AccentPrimaryBrush" Color="#0067C0" />
+    <SolidColorBrush x:Key="AccentPrimaryHoverBrush" Color="#005A9E" />
+    <SolidColorBrush x:Key="AccentSubtleBrush" Color="#E6F1FB" />
+
+    <!-- Derived Status & Warning Brushes -->
+    <SolidColorBrush x:Key="StatusOpenBgBrush" Color="#E6F1FB" />
+    <SolidColorBrush x:Key="StatusOpenFgBrush" Color="#005A9E" />
+    <SolidColorBrush x:Key="StatusRunningBgBrush" Color="#E6F4EA" />
+    <SolidColorBrush x:Key="StatusRunningFgBrush" Color="#0F7B0F" />
+    <SolidColorBrush x:Key="StatusFullBgBrush" Color="#FDE7E9" />
+    <SolidColorBrush x:Key="StatusFullFgBrush" Color="#C42B1C" />
+    <SolidColorBrush x:Key="WarningBgBrush" Color="#FFF4CE" />
+    <SolidColorBrush x:Key="WarningFgBrush" Color="#8A5300" />
+</ResourceDictionary>

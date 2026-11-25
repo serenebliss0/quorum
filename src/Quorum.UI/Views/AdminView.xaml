@@ -1,0 +1,245 @@
+<UserControl x:Class="Quorum.UI.Views.AdminView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:svc="clr-namespace:Quorum.UI.Services">
+    <UserControl.Resources>
+        <svc:StatusPillBrushConverter x:Key="PillBgConverter" IsForeground="False" />
+        <svc:StatusPillBrushConverter x:Key="PillFgConverter" IsForeground="True" />
+    </UserControl.Resources>
+
+    <Grid Margin="0,0,12,12">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="NavColumn" Width="220" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Navigation Rail -->
+        <Grid Grid.Column="0" Margin="12,6,12,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0">
+                <Button x:Name="CoursesNavBtn"
+                        Style="{StaticResource NavItemButtonStyle}"
+                        Background="{DynamicResource BgSurfaceBrush}"
+                        Margin="0,0,0,4"
+                        Click="OnSelectCoursesNav">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border x:Name="CoursesIndicator" Width="3" Height="16" CornerRadius="2"
+                                Background="{DynamicResource AccentPrimaryBrush}" Margin="0,0,10,0" />
+                        <Path Data="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
+                              Stroke="{DynamicResource AccentPrimaryBrush}" StrokeThickness="1.6"
+                              Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Center" />
+                        <TextBlock x:Name="CoursesNavLabel" Text="All Courses"
+                                   Style="{StaticResource BodyStrongTextStyle}"
+                                   Margin="10,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="EnrolmentsNavBtn"
+                        Style="{StaticResource NavItemButtonStyle}"
+                        Margin="0,0,0,4"
+                        Click="OnSelectEnrolmentsNav">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border x:Name="EnrolmentsIndicator" Width="3" Height="16" CornerRadius="2"
+                                Background="Transparent" Margin="0,0,10,0" />
+                        <Path Data="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"
+                              Stroke="{DynamicResource TextSecondaryBrush}" StrokeThickness="1.6"
+                              Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Center" />
+                        <TextBlock x:Name="EnrolmentsNavLabel" Text="All Enrolments"
+                                   Style="{StaticResource BodyTextStyle}"
+                                   Margin="10,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="PolicyNavBtn"
+                        Style="{StaticResource NavItemButtonStyle}"
+                        Click="OnSelectPolicyNav">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border x:Name="PolicyIndicator" Width="3" Height="16" CornerRadius="2"
+                                Background="Transparent" Margin="0,0,10,0" />
+                        <Path Data="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"
+                              Stroke="{DynamicResource TextSecondaryBrush}" StrokeThickness="1.6"
+                              Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Center" />
+                        <TextBlock x:Name="PolicyNavLabel" Text="Academic Policy"
+                                   Style="{StaticResource BodyTextStyle}"
+                                   Margin="10,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+
+            <Button Grid.Row="1"
+                    Style="{StaticResource NavItemButtonStyle}"
+                    Background="{DynamicResource BgSurfaceBrush}"
+                    Click="OnLogoutClick">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Path Data="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"
+                          Stroke="{DynamicResource TextSecondaryBrush}" StrokeThickness="1.6"
+                          Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Center" Margin="4,0,0,0" />
+                    <TextBlock x:Name="LogoutLabel" Text="Log Out"
+                               Style="{StaticResource BodyTextStyle}"
+                               Margin="10,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <!-- Workspace Canvas -->
+        <Border Grid.Column="1" Style="{StaticResource WorkspaceCanvasStyle}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel>
+                    <TextBlock Text="Administrator Console"
+                               Style="{StaticResource TitleTextStyle}"
+                               Margin="0,0,0,12" />
+
+                    <Border x:Name="StatusBanner"
+                            Style="{StaticResource InfoBarStyle}"
+                            Visibility="Collapsed"
+                            Margin="0,0,0,12">
+                        <TextBlock x:Name="StatusBannerText"
+                                   Style="{StaticResource BodyTextStyle}"
+                                   TextWrapping="Wrap" />
+                    </Border>
+
+                    <!-- All Courses + Update Credits -->
+                    <Border x:Name="AllCoursesCard" Style="{StaticResource CardStyle}" Margin="0,0,0,14">
+                        <StackPanel>
+                            <TextBlock Text="All Courses"
+                                       Style="{StaticResource SectionTextStyle}"
+                                       Margin="0,0,0,8" />
+
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                <TextBlock x:Name="SelectedCourseLabel"
+                                           Text="Selected: —"
+                                           Style="{StaticResource BodyStrongTextStyle}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,12,0" />
+                                <TextBox x:Name="EditCreditsBox"
+                                         Width="80"
+                                         Style="{StaticResource FluentTextBoxStyle}"
+                                         Margin="0,0,10,0" />
+                                <Button Content="Update Credits"
+                                        Style="{StaticResource PrimaryButtonStyle}"
+                                        Click="OnUpdateCreditsClick" />
+                            </StackPanel>
+
+                            <DataGrid x:Name="AllCoursesGrid"
+                                      Style="{StaticResource FluentDataGridStyle}"
+                                      SelectionChanged="OnCourseRowSelected">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="100" FontWeight="SemiBold" />
+                                    <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*" />
+                                    <DataGridTextColumn Header="Credits" Binding="{Binding Credits}" Width="80" />
+                                    <DataGridTextColumn Header="Capacity" Binding="{Binding Capacity}" Width="90" />
+                                    <DataGridTextColumn Header="MinToRun" Binding="{Binding MinToRun}" Width="90" />
+                                    <DataGridTemplateColumn Header="Status" Width="110">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Border CornerRadius="999" Padding="10,3" HorizontalAlignment="Left"
+                                                        Background="{Binding Status, Converter={StaticResource PillBgConverter}}">
+                                                    <TextBlock Text="{Binding Status}" FontSize="11" FontWeight="SemiBold"
+                                                               Foreground="{Binding Status, Converter={StaticResource PillFgConverter}}" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Responsive Split: All Enrolments + AcademicPolicy -->
+                    <Grid x:Name="BottomSplitGrid">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition x:Name="SplitColLeft" Width="*" />
+                            <ColumnDefinition x:Name="SplitColGap" Width="14" />
+                            <ColumnDefinition x:Name="SplitColRight" Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <!-- All Enrolments Card -->
+                        <Border x:Name="AllEnrolmentsCard"
+                                Grid.Row="0" Grid.Column="0"
+                                Style="{StaticResource CardStyle}">
+                            <StackPanel>
+                                <TextBlock Text="All Enrolments"
+                                           Style="{StaticResource SectionTextStyle}"
+                                           Margin="0,0,0,8" />
+
+                                <TextBlock Text="Filter Course" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
+                                <ComboBox x:Name="CourseFilterCombo"
+                                          Style="{StaticResource FluentComboBoxStyle}"
+                                          DisplayMemberPath="Code"
+                                          SelectionChanged="OnCourseFilterChanged"
+                                          Margin="0,0,0,10" />
+
+                                <DataGrid x:Name="AllEnrolmentsGrid" Style="{StaticResource FluentDataGridStyle}">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="MatricNumber" Binding="{Binding MatricNumber}" Width="110" FontWeight="SemiBold" />
+                                        <DataGridTextColumn Header="FullName" Binding="{Binding FullName}" Width="1.4*" />
+                                        <DataGridTextColumn Header="CourseCode" Binding="{Binding CourseCode}" Width="100" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- AcademicPolicy Card -->
+                        <Border x:Name="PolicyCard"
+                                Grid.Row="0" Grid.Column="2"
+                                Style="{StaticResource CardStyle}">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="AcademicPolicy"
+                                               Style="{StaticResource SectionTextStyle}" VerticalAlignment="Center" />
+                                    <Button Grid.Column="1" Content="Save Policy"
+                                            Style="{StaticResource PrimaryButtonStyle}"
+                                            Click="OnSavePolicyClick" />
+                                </Grid>
+
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="10" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="MinCredits" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
+                                        <TextBox x:Name="MinCreditsBox" Style="{StaticResource FluentTextBoxStyle}" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="MaxCredits" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
+                                        <TextBox x:Name="MaxCreditsBox" Style="{StaticResource FluentTextBoxStyle}" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="10" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="RegistrationStart" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
+                                        <DatePicker x:Name="RegistrationStartPicker" Style="{StaticResource FluentDatePickerStyle}" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="RegistrationEnd" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
+                                        <DatePicker x:Name="RegistrationEndPicker" Style="{StaticResource FluentDatePickerStyle}" />
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>
