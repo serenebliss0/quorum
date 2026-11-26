@@ -5,6 +5,8 @@ A C# WPF course registration system developed for the SEN201 Software Engineerin
 **Deadline:** 4 December 2026  
 **Platform:** Windows  
 **Process model:** Incremental (three core increments, one optional)
+<img width="1920" height="1200" alt="image" src="https://github.com/user-attachments/assets/c4824f21-f15d-4df8-95cd-b0ed16cdd80c" />
+
 
 ## Purpose
 
