@@ -1,0 +1,85 @@
+name: Quorum Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Test, Publish & Release (win-x64)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Resolve release tag
+        id: meta
+        shell: pwsh
+        run: |
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $tag = "${{ inputs.tag }}"
+          } else {
+            $tag = "${{ github.ref_name }}"
+          }
+          echo "tag=$tag" >> $env:GITHUB_OUTPUT
+
+      - name: Restore dependencies
+        run: dotnet restore Quorum.slnx
+
+      - name: Build solution (Release)
+        run: dotnet build Quorum.slnx --no-restore --configuration Release
+
+      - name: Run unit tests
+        run: dotnet test Quorum.slnx --no-build --configuration Release --verbosity normal
+
+      - name: Publish Quorum.UI (self-contained win-x64)
+        shell: pwsh
+        run: |
+          dotnet publish src/Quorum.UI/Quorum.UI.csproj `
+            --configuration Release `
+            --runtime win-x64 `
+            --self-contained true `
+            -p:PublishSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            -o publish/Quorum-${{ steps.meta.outputs.tag }}-win-x64
+
+      - name: Package release archive
+        shell: pwsh
+        run: |
+          $tag = "${{ steps.meta.outputs.tag }}"
+          Compress-Archive -Path "publish/Quorum-$tag-win-x64/*" -DestinationPath "Quorum-$tag-win-x64.zip" -Force
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Quorum-${{ steps.meta.outputs.tag }}-win-x64
+          path: Quorum-${{ steps.meta.outputs.tag }}-win-x64.zip
+
+      - name: Create GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = "${{ steps.meta.outputs.tag }}"
+          $zip = "Quorum-$tag-win-x64.zip"
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            gh release create "$tag" "$zip" --target "${{ github.sha }}" --title "Quorum $tag" --generate-notes
+          } else {
+            gh release create "$tag" "$zip" --title "Quorum $tag" --generate-notes
+          }

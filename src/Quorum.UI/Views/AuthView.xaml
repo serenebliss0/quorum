@@ -1,0 +1,130 @@
+<UserControl x:Class="Quorum.UI.Views.AuthView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="24">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <Border Style="{StaticResource CardStyle}"
+                    MaxWidth="460"
+                    CornerRadius="10"
+                    Padding="28,24"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <TabControl x:Name="AuthTabs"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            SelectionChanged="OnAuthTabChanged">
+                    <TabControl.Resources>
+                        <Style TargetType="TabPanel">
+                            <Setter Property="HorizontalAlignment" Value="Left" />
+                        </Style>
+                        <Style TargetType="TabItem">
+                            <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
+                            <Setter Property="FontSize" Value="13" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                            <Setter Property="Padding" Value="16,7" />
+                            <Setter Property="Margin" Value="0,0,6,14" />
+                            <Setter Property="Cursor" Value="Hand" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="TabItem">
+                                        <Border x:Name="Bd"
+                                                Background="{DynamicResource BgSubtleBrush}"
+                                                CornerRadius="6"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter ContentSource="Header"
+                                                              HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentPrimaryBrush}" />
+                                                <Setter Property="Foreground" Value="{DynamicResource TextOnAccentBrush}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </TabControl.Resources>
+
+                    <!-- Login Tab -->
+                    <TabItem Header="Login">
+                        <StackPanel>
+                            <TextBlock Text="Welcome to Quorum"
+                                       Style="{StaticResource TitleTextStyle}"
+                                       Margin="0,0,0,16" />
+
+                            <TextBlock Text="Username" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
+                            <TextBox x:Name="LoginUsernameBox" Style="{StaticResource FluentTextBoxStyle}" Margin="0,0,0,12" />
+
+                            <TextBlock Text="Password" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
+                            <PasswordBox x:Name="LoginPasswordBox" Style="{StaticResource FluentPasswordBoxStyle}" Margin="0,0,0,14" />
+
+                            <Border x:Name="LoginFeedbackBar"
+                                    Style="{StaticResource InfoBarStyle}"
+                                    Visibility="Collapsed"
+                                    Margin="0,0,0,14">
+                                <TextBlock x:Name="LoginFeedbackText"
+                                           Style="{StaticResource BodyTextStyle}"
+                                           TextWrapping="Wrap" />
+                            </Border>
+
+                            <Button Content="Sign In"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    HorizontalAlignment="Left"
+                                    Click="OnSignInClick" />
+                        </StackPanel>
+                    </TabItem>
+
+                    <!-- Sign Up Tab -->
+                    <TabItem Header="Sign Up">
+                        <StackPanel>
+                            <TextBlock Text="Create Account"
+                                       Style="{StaticResource TitleTextStyle}"
+                                       Margin="0,0,0,14" />
+
+                            <TextBlock Text="Account Type" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
+                            <ComboBox x:Name="RoleComboBox"
+                                      Style="{StaticResource FluentComboBoxStyle}"
+                                      SelectedIndex="0"
+                                      SelectionChanged="OnRoleSelectionChanged"
+                                      Margin="0,0,0,10">
+                                <ComboBoxItem Content="Student" />
+                                <ComboBoxItem Content="Teacher" />
+                            </ComboBox>
+
+                            <TextBlock Text="Full Name" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
+                            <TextBox x:Name="SignUpFullNameBox" Style="{StaticResource FluentTextBoxStyle}" Margin="0,0,0,10" />
+
+                            <TextBlock Text="Username" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
+                            <TextBox x:Name="SignUpUsernameBox" Style="{StaticResource FluentTextBoxStyle}" Margin="0,0,0,10" />
+
+                            <TextBlock Text="Password" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
+                            <PasswordBox x:Name="SignUpPasswordBox" Style="{StaticResource FluentPasswordBoxStyle}" Margin="0,0,0,10" />
+
+                            <StackPanel x:Name="MatricPanel" Margin="0,0,0,12">
+                                <TextBlock Text="Matric Number" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
+                                <TextBox x:Name="SignUpMatricBox" Style="{StaticResource FluentTextBoxStyle}" />
+                            </StackPanel>
+
+                            <Border x:Name="SignUpFeedbackBar"
+                                    Style="{StaticResource InfoBarStyle}"
+                                    Visibility="Collapsed"
+                                    Margin="0,0,0,12">
+                                <TextBlock x:Name="SignUpFeedbackText"
+                                           Style="{StaticResource BodyTextStyle}"
+                                           TextWrapping="Wrap" />
+                            </Border>
+
+                            <Button Content="Create Account"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    HorizontalAlignment="Left"
+                                    Click="OnCreateAccountClick" />
+                        </StackPanel>
+                    </TabItem>
+                </TabControl>
+            </Border>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
