@@ -20,7 +20,9 @@ public class CourseService
         int capacity,
         int minToRun)
     {
-        if (actor is null || actor.Role != UserRole.Administrator || actor.Role != UserRole.Teacher)
+        if (actor is null ||
+            (actor.Role != UserRole.Teacher &&
+            actor.Role != UserRole.Administrator))
         {
             return OperationResult.Failure(
                 "Only teachers and admins can create courses."

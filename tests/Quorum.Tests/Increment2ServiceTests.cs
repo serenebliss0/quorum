@@ -92,7 +92,10 @@ public class Increment2ServiceTests
             _teacher, "CSC201", "Computer Science", 30, 5
         );
 
-        Assert.True(result.IsSuccess);
+        Assert.True(
+            result.IsSuccess,
+            $"Course creation failed: {result.Message}"
+        );
         Assert.Single(_store.LoadCourses());
         Assert.Equal(3, _store.LoadCourses()[0].Credits);
     }
