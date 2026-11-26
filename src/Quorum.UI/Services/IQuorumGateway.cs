@@ -1,3 +1,5 @@
+using System.IO;
+using System.Text.Json;
 using Quorum.Data.Models;
 using Quorum.Data.Storage;
 using Quorum.Logic.Services;
@@ -25,16 +27,28 @@ public sealed record EnrolmentDisplayItem(
     string Username,
     string CourseCode);
 
+public sealed record TeacherDisplayItem(
+    string FullName,
+    string Username);
+
 /// <summary>
-/// UI-facing gateway matching Class Diagram B service contracts.
-/// AuthService is wired live; course, registration, and policy calls bridge to
-/// Increment 2 Logic services once implemented in Quorum.Logic.
+/// UI-facing gateway matching Class Diagram B service contracts plus institution/admin onboarding.
+/// AuthService and Admin/Teacher user provisioning run live against IDataStore;
+/// CourseService, RegistrationService, and PolicyService calls bridge to Increment 2 Logic once implemented.
 /// </summary>
 public interface IQuorumGateway
 {
+    bool HasAdminAccount();
+    string GetInstitutionName();
+    OperationResult SaveInstitutionName(User actor, string institutionName);
+    OperationResult SetupInstitutionAndAdmin(string institutionName, string fullName, string username, string password);
+
     User? Login(string username, string password);
     OperationResult RegisterStudent(string fullName, string username, string password, string matricNo);
     OperationResult RegisterTeacher(string fullName, string username, string password);
+
+    List<TeacherDisplayItem> GetTeachers(User actor);
+    OperationResult AddTeacherByAdmin(User actor, string fullName, string username, string password);
 
     List<CourseDisplayItem> BrowseCourses();
     List<RegistrationDisplayItem> GetStudentRegistrations(string studentId);
@@ -51,13 +65,11 @@ public interface IQuorumGateway
     OperationResult SavePolicy(User actor, AcademicPolicy policy);
 }
 
-/// <summary>
-/// Default gateway using real AuthService + JsonDataStore and sample Increment 2 preview data
-/// until CourseService, RegistrationService, and PolicyService are added to Quorum.Logic.
-/// </summary>
 public sealed class QuorumGateway : IQuorumGateway
 {
+    private readonly IDataStore _store;
     private readonly AuthService _authService;
+    private readonly string _institutionPath;
 
     private readonly List<CourseDisplayItem> _previewCourses =
     [
@@ -68,9 +80,9 @@ public sealed class QuorumGateway : IQuorumGateway
 
     private readonly List<RegistrationDisplayItem> _previewRegistrations =
     [
-        new("SEN201", "Software Engineering", 3, "2026-11-25"),
-        new("CSC202", "Operating Systems", 3, "2026-11-25"),
-        new("GST201", "Academic Writing", 3, "2026-11-25"),
+        new("SEN201", "Software Engineering", 3, "2026-11-26"),
+        new("CSC202", "Operating Systems", 3, "2026-11-26"),
+        new("GST201", "Academic Writing", 3, "2026-11-26"),
     ];
 
     private readonly AcademicPolicy _previewPolicy = new()
@@ -83,8 +95,94 @@ public sealed class QuorumGateway : IQuorumGateway
 
     public QuorumGateway()
     {
-        IDataStore store = new JsonDataStore();
-        _authService = new AuthService(store);
+        _store = new JsonDataStore();
+        _authService = new AuthService(_store);
+
+        string dataDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Quorum");
+        Directory.CreateDirectory(dataDir);
+        _institutionPath = Path.Combine(dataDir, "institution.json");
+    }
+
+    public bool HasAdminAccount()
+        => _store.LoadUsers().Any(u => u.Role == UserRole.Administrator);
+
+    public string GetInstitutionName()
+    {
+        if (!File.Exists(_institutionPath))
+            return "Quorum University";
+
+        try
+        {
+            string json = File.ReadAllText(_institutionPath);
+            using JsonDocument doc = JsonDocument.Parse(json);
+            if (doc.RootElement.TryGetProperty("InstitutionName", out JsonElement prop))
+            {
+                string? name = prop.GetString();
+                if (!string.IsNullOrWhiteSpace(name))
+                    return name;
+            }
+        }
+        catch
+        {
+            // Fallback to default display name if settings file is unreadable.
+        }
+
+        return "Quorum University";
+    }
+
+    public OperationResult SaveInstitutionName(User actor, string institutionName)
+    {
+        if (actor.Role != UserRole.Administrator)
+            return OperationResult.Failure("Only an Administrator can update institution settings.");
+
+        if (string.IsNullOrWhiteSpace(institutionName))
+            return OperationResult.Failure("Institution name is required.");
+
+        WriteInstitutionName(institutionName.Trim());
+        return OperationResult.Success($"Institution updated to {institutionName.Trim()}.");
+    }
+
+    public OperationResult SetupInstitutionAndAdmin(
+        string institutionName,
+        string fullName,
+        string username,
+        string password)
+    {
+        if (string.IsNullOrWhiteSpace(institutionName) ||
+            string.IsNullOrWhiteSpace(fullName) ||
+            string.IsNullOrWhiteSpace(username) ||
+            string.IsNullOrWhiteSpace(password))
+        {
+            return OperationResult.Failure("All setup fields are required.");
+        }
+
+        List<User> users = _store.LoadUsers();
+        if (users.Any(u => u.Username.Equals(username.Trim(), StringComparison.OrdinalIgnoreCase)))
+            return OperationResult.Failure("Username already exists.");
+
+        var (hash, salt) = PasswordHasher.HashPassword(password);
+        User admin = new()
+        {
+            FullName = fullName.Trim(),
+            Username = username.Trim(),
+            PasswordHash = hash,
+            Salt = salt,
+            Role = UserRole.Administrator,
+        };
+
+        users.Add(admin);
+        _store.SaveUsers(users);
+        WriteInstitutionName(institutionName.Trim());
+
+        return OperationResult.Success("Institution and Administrator account configured.");
+    }
+
+    private void WriteInstitutionName(string name)
+    {
+        string json = JsonSerializer.Serialize(new { InstitutionName = name });
+        File.WriteAllText(_institutionPath, json);
     }
 
     public User? Login(string username, string password)
@@ -95,6 +193,25 @@ public sealed class QuorumGateway : IQuorumGateway
 
     public OperationResult RegisterTeacher(string fullName, string username, string password)
         => _authService.RegisterTeacher(fullName, username, password);
+
+    public List<TeacherDisplayItem> GetTeachers(User actor)
+    {
+        if (actor.Role != UserRole.Administrator)
+            return [];
+
+        return _store.LoadUsers()
+            .Where(u => u.Role == UserRole.Teacher)
+            .Select(u => new TeacherDisplayItem(u.FullName, u.Username))
+            .ToList();
+    }
+
+    public OperationResult AddTeacherByAdmin(User actor, string fullName, string username, string password)
+    {
+        if (actor.Role != UserRole.Administrator)
+            return OperationResult.Failure("Only an Administrator can add teachers.");
+
+        return _authService.RegisterTeacher(fullName, username, password);
+    }
 
     public List<CourseDisplayItem> BrowseCourses()
         => [.. _previewCourses];

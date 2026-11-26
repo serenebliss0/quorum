@@ -1,0 +1,128 @@
+<UserControl x:Class="Quorum.UI.Views.AdminSetupView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="28,16,28,24">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="HeroColumn" Width="1.05*" />
+            <ColumnDefinition x:Name="GapColumn" Width="24" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Institution Setup Overview Panel -->
+        <Border x:Name="HeroPanel"
+                Grid.Column="0"
+                Background="{DynamicResource AccentSubtleBrush}"
+                BorderBrush="{DynamicResource BorderHairlineBrush}"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="36">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="40" Height="40" CornerRadius="10"
+                            Background="{DynamicResource AccentPrimaryBrush}" Margin="0,0,12,0">
+                        <Path Data="M12 3a9 9 0 1 0 6.36 15.36L21 21M12 7a5 5 0 1 0 3.54 8.54"
+                              Stroke="{DynamicResource TextOnAccentBrush}"
+                              StrokeThickness="2.2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                              Width="20" Height="20" Stretch="Uniform" />
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Quorum" Style="{StaticResource SectionTextStyle}" />
+                        <TextBlock Text="First-Run Setup" Style="{StaticResource CaptionTextStyle}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" VerticalAlignment="Center">
+                    <TextBlock Text="Set up your institution"
+                               FontFamily="{StaticResource AppFont}"
+                               FontSize="30"
+                               FontWeight="Bold"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               Margin="0,0,0,18" />
+
+                    <Border Style="{StaticResource CardStyle}" Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="1. Name Your School or University" Style="{StaticResource BodyStrongTextStyle}" />
+                            <TextBlock Text="Appears across sign-in and workspace headers." Style="{StaticResource CaptionTextStyle}" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource CardStyle}" Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="2. Provision Primary Administrator" Style="{StaticResource BodyStrongTextStyle}" />
+                            <TextBlock Text="Unlocks policy configuration, credit edits, and teacher management." Style="{StaticResource CaptionTextStyle}" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="3. Open Registration" Style="{StaticResource BodyStrongTextStyle}" />
+                            <TextBlock Text="Add teachers, set credit limits, and start student enrolments." Style="{StaticResource CaptionTextStyle}" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <TextBlock Grid.Row="2"
+                           Text="Local JSON Storage  ·  %LocalAppData%\Quorum"
+                           Style="{StaticResource CaptionTextStyle}" />
+            </Grid>
+        </Border>
+
+        <!-- Right Setup Form -->
+        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <Border Style="{StaticResource CardStyle}"
+                    MaxWidth="480"
+                    CornerRadius="12"
+                    Padding="32,26"
+                    VerticalAlignment="Center">
+                <StackPanel>
+                    <TextBlock Text="Institution &amp; Admin"
+                               Style="{StaticResource TitleTextStyle}"
+                               Margin="0,0,0,18" />
+
+                    <TextBlock Text="School / University Name" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
+                    <TextBox x:Name="InstitutionBox"
+                             Style="{StaticResource FluentTextBoxStyle}"
+                             ToolTipService.InitialShowDelay="800"
+                             ToolTip="Official name of the school or university using Quorum."
+                             Margin="0,0,0,12" />
+
+                    <TextBlock Text="Administrator Full Name" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
+                    <TextBox x:Name="AdminNameBox" Style="{StaticResource FluentTextBoxStyle}" Margin="0,0,0,12" />
+
+                    <TextBlock Text="Admin Username" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
+                    <TextBox x:Name="AdminUsernameBox" Style="{StaticResource FluentTextBoxStyle}" Margin="0,0,0,12" />
+
+                    <TextBlock Text="Admin Password" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
+                    <PasswordBox x:Name="AdminPasswordBox" Style="{StaticResource FluentPasswordBoxStyle}" Margin="0,0,0,16" />
+
+                    <Border x:Name="SetupFeedbackBar"
+                            Style="{StaticResource InfoBarStyle}"
+                            Visibility="Collapsed"
+                            Margin="0,0,0,14">
+                        <TextBlock x:Name="SetupFeedbackText"
+                                   Style="{StaticResource BodyTextStyle}"
+                                   TextWrapping="Wrap" />
+                    </Border>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Complete Setup"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Margin="0,0,10,0"
+                                Click="OnCompleteSetupClick" />
+                        <Button x:Name="BackToLoginButton"
+                                Content="Go to Login"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Click="OnGoToLoginClick" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

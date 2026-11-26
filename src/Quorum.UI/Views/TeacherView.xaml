@@ -13,18 +13,35 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <!-- Left Navigation Rail -->
-        <Grid Grid.Column="0" Margin="12,6,12,0">
+        <!-- Left Collapsible Navigation Rail -->
+        <Grid Grid.Column="0" Margin="10,6,10,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0">
+                <Button Style="{StaticResource NavItemButtonStyle}"
+                        Margin="0,0,0,6"
+                        ToolTipService.InitialShowDelay="800"
+                        ToolTip="Collapse or expand navigation menu"
+                        Click="OnToggleNavClick">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Path Data="M3 6h18M3 12h18M3 18h18"
+                              Stroke="{DynamicResource TextSecondaryBrush}" StrokeThickness="1.7"
+                              Width="15" Height="15" Stretch="Uniform" Margin="4,0,0,0" />
+                        <TextBlock x:Name="CollapseNavLabel" Text="Menu"
+                                   Style="{StaticResource CaptionTextStyle}"
+                                   Margin="12,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
                 <Button x:Name="CoursesNavBtn"
                         Style="{StaticResource NavItemButtonStyle}"
                         Background="{DynamicResource BgSurfaceBrush}"
                         Margin="0,0,0,4"
+                        ToolTipService.InitialShowDelay="800"
+                        ToolTip="View My Courses"
                         Click="OnSelectCoursesNav">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Border x:Name="CoursesIndicator" Width="3" Height="16" CornerRadius="2"
@@ -41,6 +58,8 @@
                 <Button x:Name="CreateNavBtn"
                         Style="{StaticResource NavItemButtonStyle}"
                         Margin="0,0,0,4"
+                        ToolTipService.InitialShowDelay="800"
+                        ToolTip="Create Course"
                         Click="OnSelectCreateNav">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Border x:Name="CreateIndicator" Width="3" Height="16" CornerRadius="2"
@@ -56,6 +75,8 @@
 
                 <Button x:Name="EnrolmentsNavBtn"
                         Style="{StaticResource NavItemButtonStyle}"
+                        ToolTipService.InitialShowDelay="800"
+                        ToolTip="View Enrolled Students"
                         Click="OnSelectEnrolmentsNav">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Border x:Name="EnrolmentsIndicator" Width="3" Height="16" CornerRadius="2"
@@ -73,6 +94,8 @@
             <Button Grid.Row="1"
                     Style="{StaticResource NavItemButtonStyle}"
                     Background="{DynamicResource BgSurfaceBrush}"
+                    ToolTipService.InitialShowDelay="800"
+                    ToolTip="Log Out"
                     Click="OnLogoutClick">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Path Data="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"
@@ -121,7 +144,9 @@
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <Border CornerRadius="999" Padding="10,3" HorizontalAlignment="Left"
-                                                        Background="{Binding Status, Converter={StaticResource PillBgConverter}}">
+                                                        Background="{Binding Status, Converter={StaticResource PillBgConverter}}"
+                                                        ToolTipService.InitialShowDelay="800"
+                                                        ToolTip="Open: below MinToRun · Running: quorum met · Full: at Capacity.">
                                                     <TextBlock Text="{Binding Status}" FontSize="11" FontWeight="SemiBold"
                                                                Foreground="{Binding Status, Converter={StaticResource PillFgConverter}}" />
                                                 </Border>
@@ -159,6 +184,8 @@
                                                Style="{StaticResource SectionTextStyle}" VerticalAlignment="Center" />
                                     <Button Grid.Column="1" Content="Create Course"
                                             Style="{StaticResource PrimaryButtonStyle}"
+                                            ToolTipService.InitialShowDelay="800"
+                                            ToolTip="Creates a new course starting with a default of 3 credits. Only an Administrator can edit credits."
                                             Click="OnCreateCourseClick" />
                                 </Grid>
 
@@ -176,11 +203,17 @@
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="0">
                                         <TextBlock Text="Capacity" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
-                                        <TextBox x:Name="CourseCapacityBox" Style="{StaticResource FluentTextBoxStyle}" />
+                                        <TextBox x:Name="CourseCapacityBox"
+                                                 Style="{StaticResource FluentTextBoxStyle}"
+                                                 ToolTipService.InitialShowDelay="800"
+                                                 ToolTip="Maximum number of students permitted to register for this course." />
                                     </StackPanel>
                                     <StackPanel Grid.Column="2">
                                         <TextBlock Text="MinToRun" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
-                                        <TextBox x:Name="CourseMinToRunBox" Style="{StaticResource FluentTextBoxStyle}" />
+                                        <TextBox x:Name="CourseMinToRunBox"
+                                                 Style="{StaticResource FluentTextBoxStyle}"
+                                                 ToolTipService.InitialShowDelay="800"
+                                                 ToolTip="Minimum number of registered students required for the course to reach Running (quorum)." />
                                     </StackPanel>
                                 </Grid>
                             </StackPanel>

@@ -2,24 +2,31 @@
 
 **Figma Source:** [Quorum — WPF UI Design](https://www.figma.com/design/P2iXhyeWO3VTTAM2oZlScS)  
 **Figma Pages:** `01 · Foundations & Tokens`, `02 · Wireframes`, `03 · High Fidelity (Light)`, `04 · High Fidelity (Dark)`  
-**Reference Direction:** Windows 11 Fluent Design (Microsoft WPF Gallery Preview) — single-window Mica shell, translucent card layers, hairline borders, rounded corners, collapsible left navigation rail with 3 px accent indicator.
+**Reference Direction:** Windows 11 Fluent Design (Microsoft WPF Gallery Preview) — single-window Mica shell, automatic Windows system theme detection (`AppsUseLightTheme`), translucent card layers, hairline borders, rounded corners, and a collapsible left navigation rail (`≡ Menu` toggle + `< 960 px` auto-collapse).
 
 ---
 
-## 1. Window Architecture & Responsiveness
+## 1. Window Architecture, Theme & Responsiveness
 
-Quorum runs inside **one single `MainWindow`** (`1280 × 720` default, `WindowStartupLocation="CenterScreen"`). Views swap inside a root `ContentControl` (`LoginView`, `SignUpView`, `StudentView`, `TeacherView`, `AdminView`) without spawning separate top-level windows.
+Quorum runs inside **one single `MainWindow`** (`1280 × 720` default, `WindowStartupLocation="CenterScreen"`). Views swap inside a root `ContentControl`:
+1. `SplashView` (brief `1.3 s` launch splash with placeholder geometric Quorum logo + progress bar)
+2. `AdminSetupView` (first-run onboarding when no Administrator exists yet: configure School/University Name + primary Administrator account)
+3. `AuthView` (two-column split `Login` / `Sign Up` once an Administrator exists)
+4. `StudentView`, `TeacherView`, `AdminView` (role workspaces)
+
+### System Theme & Tooltips
+- **System Theme Default:** `ThemeManager.ApplySystemTheme()` reads `HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize\AppsUseLightTheme` on startup and allows manual toggling in the title bar.
+- **Hover Tooltips:** Key fields (`MinToRun`, `Capacity`, `Credits`, `MinCredits`, `MaxCredits`, `RegistrationStart`, `RegistrationEnd`), `Status` pills (`Open`, `Running`, `Full`), and navigation/action buttons show Fluent-styled `ToolTip`s after `800 ms` (`ToolTipService.InitialShowDelay="800"`).
 
 ### Responsive Rules (`MinWidth = 800`, `MinHeight = 600`)
-- **Expanded (`>= 960 px` width, e.g., `1280 × 720` or `1920 × 1080`):**
-  - Left navigation rail is `220 px` wide (icon + label + `Credit Load` summary + `Log Out`).
-  - Workspace uses `*` proportional `Grid` columns (`ScrollViewer` wraps content vertically so tall tables never clip).
-  - Auth views (`LoginView`, `SignUpView`) center a `440–460 px` `MaxWidth` card inside the full `MainWindow`.
+- **Expanded (`>= 960 px` width):**
+  - Left navigation rail defaults to `220 px` and can be manually collapsed/expanded via the `≡ Menu` button (`56 px` ↔ `220 px`).
+  - `AdminSetupView` and `AuthView` render a two-column split (`1.05*` Hero Brand/Overview panel + `1*` Form card).
   - Split cards on `TeacherView` and `AdminView` sit side-by-side (`1*` / `1*`).
-- **Compact (`< 960 px` width, e.g., `800 × 720` half-screen snap):**
-  - Left navigation rail collapses to a `56 px` icon-only rail.
+- **Compact (`< 960 px` width, e.g., `800 × 720`):**
+  - Left navigation rail auto-collapses to `56 px` icon-only mode.
+  - `AdminSetupView` and `AuthView` hide the left hero panel so the form fills the view cleanly.
   - Two-column splits (`TeacherView`, `AdminView`) reflow into a single-column vertical stack inside the workspace `ScrollViewer`.
-  - `DataGrid` columns use `*` star widths so horizontal resizing never clips cells.
 
 ---
 
@@ -30,252 +37,56 @@ Quorum runs inside **one single `MainWindow`** (`1280 × 720` default, `WindowSt
 | Token | Light | Dark | Usage |
 |---|---|---|---|
 | `bg/mica` | `#F3F5F8` | `#1B1E24` | `MainWindow` backdrop and left navigation rail |
-| `bg/surface` | `#FFFFFF` (92%–96%) | `#252932` (90%–96%) | Cards, inputs, `DataGrid` rows, workspace canvas |
-| `border/hairline` | `#DCE1EA` | `#363C49` | 1 px strokes on cards, inputs, and tables |
+| `bg/surface` | `#FFFFFF` (90%–96%) | `#252932` (90%–96%) | Cards, inputs, `DataGrid` rows, workspace canvas |
+| `border/hairline` | `#DCE1EA` | `#363C49` | 1 px strokes on cards, inputs, tables, tooltips |
 | `text/primary` | `#181B22` | `#F2F4F8` | Headings, table cells, primary labels |
-| `accent/primary` | `#0067C0` | `#4CC2FF` | Primary buttons, active nav bar, credit total |
+| `accent/primary` | `#0067C0` | `#4CC2FF` | Primary buttons, active nav bar, credit total, logo badge |
 
 Secondary & Derived Tokens:
 - **Muted Text (`text/secondary`):** `#5A6374` (Light) / `#9FA8B8` (Dark)
-- **Subtle Fill (`bg/subtle`):** `#EAEFF5` (Light) / `#2E333E` (Dark) — `DataGrid` column headers, tab strip track
+- **Subtle Fill (`bg/subtle`):** `#EAEFF5` (Light) / `#2E333E` (Dark) — `DataGrid` column headers, tab track
+- **Accent Subtle (`accent/subtle`):** `#E6F1FB` (Light) / `#1F364D` (Dark) — Hero panel, InfoBar, selected row
 - **Status Pills (`CourseStatus`):**
   - `Open`: `#E6F1FB` / `#005A9E` (Light) · `#1F364D` / `#60CDFF` (Dark)
   - `Running`: `#E6F4EA` / `#0F7B0F` (Light) · `#1D3826` / `#6CCB5F` (Dark)
   - `Full`: `#FDE7E9` / `#C42B1C` (Light) · `#422125` / `#FF99A4` (Dark)
 - **Advisory Warning (`IsBelowMinCredits`):** `#FFF4CE` / `#8A5300` (Light) · `#433519` / `#FCE100` (Dark)
 
-### 2.2 Typography (Single Font)
+### 2.2 Typography & Spacing
 
-- **Font Family:** `Segoe UI` (`Segoe UI Variable` on Windows 11; rendered as `Noto Sans` in Figma)
-- **Scale:**
-  - `Title`: `24 px` Bold (line height `32 px`)
-  - `Section`: `16 px` SemiBold (line height `22 px`)
-  - `BodyStrong`: `13 px` SemiBold (line height `18 px`)
-  - `Body`: `13 px` Regular (line height `18 px`)
-  - `Caption`: `11 px` Medium (line height `16 px`)
-
-### 2.3 Spacing & Radii (`8 px` Base)
-
-- **Spacing:** `4 px` (label-to-input), `8 px` (inline gap), `12 px` (form row gap), `16 px` (card padding), `24 px` (page/canvas padding)
-- **Corner Radius:** `6 px` (inputs, buttons, nav items), `8 px` (cards, `DataGrid` container), `12 px` (window frame), `999 px` (status pills)
+- **Font Family:** `Segoe UI Variable, Segoe UI` (`Noto Sans` in Figma)
+  - `Title`: `24 px` Bold · `Section`: `16 px` SemiBold · `BodyStrong`: `13 px` SemiBold · `Body`: `13 px` Regular · `Caption`: `11 px` Medium
+- **Spacing (`8 px` base):** `4 px`, `8 px`, `12 px`, `16 px`, `24 px`
+- **Corner Radius:** `6 px` (inputs, buttons, tooltips, nav items), `8 px` (cards, tab track), `12 px` (window & hero panels), `999 px` (status pills)
 
 ---
 
-## 3. View 1 — `LoginView` + `SignUpView` (inside `MainWindow`)
+## 3. Views Inside `MainWindow`
 
-### 3.1 Wireframe & High-Fidelity Layout
+### 3.0 `SplashView` (`1280 × 720`)
+- Centered placeholder geometric Quorum emblem (`76 × 76` rounded badge), `"Quorum"` title, `"Course Registration System"`, and indeterminate `ProgressBar`. Transitions after `1.3 s` to `AdminSetupView` (if `!HasAdminAccount()`) or `AuthView`.
 
-- **Figma Frames (`1280 × 720`):**
-  - Wireframe: `02 · Wireframes` → `WF / MainWindow — LoginView`, `WF / MainWindow — SignUpView`
-  - High Fidelity: `03 · High Fidelity (Light)` & `04 · High Fidelity (Dark)` → `MainWindow · LoginView (1280x720)`, `MainWindow · SignUpView (1280x720)`
-- **Structure:** Centered card (`MaxWidth = 440–460 px`) inside the `1280 × 720` `MainWindow` with a two-tab `TabControl` (`Login` | `Sign Up`). Administrators sign in on `Login` with their provisioned account; `Sign Up` only allows `Student` and `Teacher`.
+### 3.1 `AdminSetupView` (`1280 × 720`, First-Run Onboarding)
+- **Layout:** Two-column split (`1.05*` 3-step onboarding hero + `1*` setup form card).
+- **Controls:** `TextBox` (`School / University Name`, `Admin Full Name`, `Admin Username`), `PasswordBox` (`Admin Password`), `TextBlock` (`OperationResult.Message` banner), `Button` (`Complete Setup`, `Go to Login`).
+- **Action:** Calls `SetupInstitutionAndAdmin(...)`, persists Administrator (`UserRole.Administrator`) via `PasswordHasher` + `IDataStore` and `InstitutionName`, then signs straight into `AdminView`.
 
-```text
-+----------------------------------------------------------------------+
-| Quorum · SignUpView (1280x720)                               _ [] X  |
-+----------------------------------------------------------------------+
-|                                                                      |
-|                  +--------------------------------+                  |
-|                  | [ Login ]  [ Sign Up ] (Tabs)  |                  |
-|                  | Create Account                 |                  |
-|                  | Account Type [ComboBox]        |                  |
-|                  | Full Name    [TextBox]         |                  |
-|                  | Username     [TextBox]         |                  |
-|                  | Password     [PasswordBox]     |                  |
-|                  | Matric No.   [TextBox] (Stud)  |                  |
-|                  | [ OperationResult.Message ]    |                  |
-|                  | [ Create Account ] (Button)    |                  |
-|                  +--------------------------------+                  |
-|                                                                      |
-+----------------------------------------------------------------------+
-```
+### 3.2 `AuthView` — `Login` & `Sign Up` (`1280 × 720`)
+- **Layout:** Two-column split (`1.05*` Institution Hero + Quorum overview cards + `Institution & Admin Setup` button; `1*` Auth form card with unclipped custom `TabControl` pill track).
+- **Controls:** `TabControl` (`Login` | `Sign Up`), `ComboBox` (`Student` | `Teacher`), `TextBox` (`Full Name`, `Username`, `Matric Number` when `Student`), `PasswordBox` (`Password`), `TextBlock` (`OperationResult.Message` / login error banner), `Button` (`Sign In`, `Create Account`).
+- **Logic Calls:** `AuthService.Login(username, password)`, `AuthService.RegisterStudent(...)`, `AuthService.RegisterTeacher(...)`.
 
-### 3.2 WPF Control List
+### 3.3 `StudentView` (`1280 × 720` + `< 960 px` Compact)
+- **Layout:** `≡ Menu` collapsible left rail (`220 px` / `56 px`, `Browse Courses`, `My Courses`, `Credit Load`, `Log Out`) + scrollable workspace with `OperationResult.Message` banner, amber `IsBelowMinCredits` warning banner, `Available Courses` `DataGrid` (`Code`, `Title`, `Credits`, `Capacity`, `Status` pill) + `Register` button, and `My Courses` `DataGrid` (`Code`, `Title`, `Credits`, `RegisteredAt`) + `Drop` button.
+- **Logic Calls:** `CourseService.BrowseCourses()`, `CourseService.GetCourseStatus(courseCode)`, `RegistrationService.Register(studentId, courseCode)`, `RegistrationService.Drop(studentId, courseCode)`, `RegistrationService.GetStudentRegistrations(studentId)`, `RegistrationService.IsBelowMinCredits(studentId)`.
 
-| Region | WPF Controls |
-|---|---|
-| Shell & Card | `Grid` (centered `MaxWidth` container inside `MainWindow`), `StackPanel` (form stack) |
-| Mode Switcher | `TabControl` (`Login` tab, `Sign Up` tab) |
-| `LoginView` | `TextBlock` (labels), `TextBox` (Username), `PasswordBox` (Password), `TextBlock` (error banner), `Button` (`Sign In`) |
-| `SignUpView` | `TextBlock` (labels), `ComboBox` (`Student` \| `Teacher`), `TextBox` (Full Name), `TextBox` (Username), `PasswordBox` (Password), `TextBox` (Matric Number — visible only when `Student` is selected), `TextBlock` (status banner), `Button` (`Create Account`) |
+### 3.4 `TeacherView` (`1280 × 720` + `< 960 px` Compact)
+- **Layout:** `≡ Menu` collapsible left rail (`My Courses`, `Create Course`, `Enrolments`, `Log Out`) + `OperationResult.Message` banner + `My Courses` `DataGrid` (`Code`, `Title`, `Capacity`, `MinToRun`, `Status` pill) + responsive 2-column split (`Create Course` form with `Code`, `Title`, `Capacity`, `MinToRun` — NO credits field — and `Enrolled Students` `DataGrid`: `MatricNumber`, `FullName`, `Username`).
+- **Logic Calls:** `CourseService.GetTeacherCourses(actor)`, `CourseService.GetCourseStatus(courseCode)`, `CourseService.CreateCourse(actor, code, title, capacity, minToRun)`, `RegistrationService.GetCourseEnrolments(actor, courseCode)`.
 
-### 3.3 Button-to-Logic Mapping
-
-| Button | Logic Method Called | Notes |
-|---|---|---|
-| `Sign In` | `AuthService.Login(username, password)` | Returns `User?`; `MainWindow` swaps `ContentControl` by `User.Role` (`UserRole.Student`, `UserRole.Teacher`, `UserRole.Administrator`) |
-| `Create Account` (`Student`) | `AuthService.RegisterStudent(fullName, username, password, matricNo)` | Returns `OperationResult` |
-| `Create Account` (`Teacher`) | `AuthService.RegisterTeacher(fullName, username, password)` | Returns `OperationResult` |
-
-### 3.4 Lists, Grids & `OperationResult.Message` Placement
-
-- **Lists/Grids:** `ComboBox` Account Type lists `Student` and `Teacher` only.
-- **Feedback Display:** Inline banner `TextBlock` positioned directly above the primary action button inside the centered card:
-  - On `SignUpView`, binds to `OperationResult.Message`.
-  - On `LoginView`, displays `"Invalid username or password."` when `AuthService.Login` returns `null`.
-
----
-
-## 4. View 2 — `StudentView` (inside `MainWindow`)
-
-### 4.1 Wireframe & High-Fidelity Layout
-
-- **Figma Frames (`1280 × 720`):**
-  - Wireframe: `02 · Wireframes` → `WF / MainWindow — StudentView`
-  - High Fidelity: `03 · High Fidelity (Light)` & `04 · High Fidelity (Dark)` → `MainWindow · StudentView (1280x720)`
-- **Structure:** Responsive two-column `Grid`: collapsible left navigation rail (`220 px` expanded / `56 px` compact) + scrollable right workspace with banners and full-width `DataGrid` cards.
-
-```text
-+----------------------------------------------------------------------+
-| Quorum · StudentView (1280x720)                              _ [] X  |
-+------------------+---------------------------------------------------+
-| | Browse Courses | Course Registration                               |
-|   My Courses     | [ TextBlock: OperationResult.Message ]            |
-|                  | [ TextBlock: MinCredits Warning (if true) ]       |
-|                  | +-----------------------------------------------+ |
-|                  | | Available Courses                 [ Register ] | |
-|                  | | DataGrid: Code | Title | Credits | Cap | Status| |
-|                  | +-----------------------------------------------+ |
-| +--------------+ | +-----------------------------------------------+ |
-| | Credit Load  | | | My Courses                            [ Drop ] | |
-| | 9 / 24 Cr.   | | | DataGrid: Code | Title | Credits | RegisteredAt| |
-| +--------------+ | +-----------------------------------------------+ |
-| [ Log Out ]      |                                                   |
-+------------------+---------------------------------------------------+
-```
-
-### 4.2 WPF Control List
-
-| Region | WPF Controls |
-|---|---|
-| Shell Layout | `Grid` (2 columns: rail + `*` scrollable workspace), `StackPanel` (rail & card stacks) |
-| Navigation & Summary | `TabControl` (`Browse Courses`, `My Courses`), `TextBlock` (credit total, e.g. `9 / 24 Credits`), `Button` (`Log Out`) |
-| Feedback Banners | `TextBlock` (`OperationResult.Message` banner), `TextBlock` (advisory warning banner, visible when `IsBelowMinCredits == true`) |
-| Browse Courses Card | `TextBlock` (heading), `Button` (`Register`), `DataGrid` (Available Courses) |
-| My Courses Card | `TextBlock` (heading), `Button` (`Drop`), `DataGrid` (My Courses) |
-
-### 4.3 Button-to-Logic Mapping
-
-| Button | Logic Method Called | Post-Action Refresh |
-|---|---|---|
-| `Register` | `RegistrationService.Register(studentId, courseCode)` | Reloads `CourseService.BrowseCourses()`, `CourseService.GetCourseStatus(courseCode)`, `RegistrationService.GetStudentRegistrations(studentId)`, `RegistrationService.IsBelowMinCredits(studentId)` |
-| `Drop` | `RegistrationService.Drop(studentId, courseCode)` | Reloads `CourseService.BrowseCourses()`, `CourseService.GetCourseStatus(courseCode)`, `RegistrationService.GetStudentRegistrations(studentId)`, `RegistrationService.IsBelowMinCredits(studentId)` |
-| `Log Out` | — (UI session clear) | Clears active `User` in `MainWindow` and switches back to `LoginView` |
-
-### 4.4 Lists, Grids & `OperationResult.Message` Placement
-
-- **Available Courses `DataGrid`:** `Code`, `Title`, `Credits`, `Capacity` (`enrolled / capacity`), `Status` (derived `Open` / `Running` / `Full` via `CourseService.GetCourseStatus(courseCode)`).
-- **My Courses `DataGrid`:** `Code`, `Title`, `Credits`, `RegisteredAt` (from `RegistrationService.GetStudentRegistrations(studentId)`).
-- **`OperationResult.Message`:** Displayed in the top status banner `TextBlock` directly below the `Course Registration` heading.
-- **`IsBelowMinCredits(studentId)` Warning:** Displayed in the amber warning `TextBlock` immediately beneath the status banner whenever `IsBelowMinCredits(studentId)` returns `true`.
-
----
-
-## 5. View 3 — `TeacherView` (inside `MainWindow`)
-
-### 5.1 Wireframe & High-Fidelity Layout
-
-- **Figma Frames (`1280 × 720`):**
-  - Wireframe: `02 · Wireframes` → `WF / MainWindow — TeacherView`
-  - High Fidelity: `03 · High Fidelity (Light)` & `04 · High Fidelity (Dark)` → `MainWindow · TeacherView (1280x720)`
-- **Structure:** Collapsible left navigation rail + right scrollable workspace with status banner, `My Courses` `DataGrid`, and a responsive two-column split (`Create Course` form on left, `Enrolled Students` `DataGrid` on right; stacks vertically below `960 px`).
-
-```text
-+----------------------------------------------------------------------+
-| Quorum · TeacherView (1280x720)                              _ [] X  |
-+------------------+---------------------------------------------------+
-| | My Courses     | Teacher Workspace                                 |
-|   Create Course  | [ TextBlock: OperationResult.Message ]            |
-|   Enrolments     | +-----------------------------------------------+ |
-|                  | | My Courses                                    | |
-|                  | | DataGrid: Code | Title | Cap | MinToRun | Stat| |
-|                  | +-----------------------------------------------+ |
-|                  | +-----------------------+ +---------------------+ |
-|                  | | Create Course         | | Enrolled Students   | |
-|                  | | Code [TextBox]        | | DataGrid:           | |
-|                  | | Title [TextBox]       | | MatricNo | FullName | |
-|                  | | Cap/Min [TextBox]     | | | Username          | |
-| [ Log Out ]      | | [ Create Course ]     | +---------------------+ |
-+------------------+---------------------------------------------------+
-```
-
-### 5.2 WPF Control List
-
-| Region | WPF Controls |
-|---|---|
-| Shell Layout | `Grid` (2-column shell + responsive bottom 2-column split), `StackPanel` (form & rail stacks) |
-| Navigation | `TabControl` (`My Courses`, `Create Course`, `Enrolments`), `Button` (`Log Out`) |
-| Feedback Banner | `TextBlock` (`OperationResult.Message` banner) |
-| My Courses Card | `TextBlock` (heading), `DataGrid` (Teacher's courses) |
-| Create Course Form | `TextBlock` (labels), `TextBox` (Code), `TextBox` (Title), `TextBox` (Capacity), `TextBox` (MinToRun), `Button` (`Create Course`) — **no Credits input** |
-| Enrolled Students Card | `TextBlock` (selected course heading), `DataGrid` (Enrolled Students) |
-
-### 5.3 Button-to-Logic Mapping
-
-| Trigger / Button | Logic Method Called | Post-Action Refresh |
-|---|---|---|
-| `Create Course` | `CourseService.CreateCourse(actor, code, title, capacity, minToRun)` | Reloads `CourseService.GetTeacherCourses(actor)` + `CourseService.GetCourseStatus(courseCode)` |
-| Select row in `My Courses` | `RegistrationService.GetCourseEnrolments(actor, courseCode)` | Populates Enrolled Students `DataGrid` |
-| `Log Out` | — (UI session clear) | Clears active `User` in `MainWindow` and switches back to `LoginView` |
-
-### 5.4 Lists, Grids & `OperationResult.Message` Placement
-
-- **My Courses `DataGrid`:** `Code`, `Title`, `Capacity`, `MinToRun`, `Status` (derived `Open` / `Running` / `Full` via `CourseService.GetCourseStatus(courseCode)`). New courses default to `Credits = 3` in Logic.
-- **Enrolled Students `DataGrid`:** `MatricNumber`, `FullName`, `Username` for the selected course (via `RegistrationService.GetCourseEnrolments(actor, courseCode)`).
-- **`OperationResult.Message`:** Displayed in the top status banner `TextBlock` directly below the `Teacher Workspace` heading.
-
----
-
-## 6. View 4 — `AdminView` (inside `MainWindow`)
-
-### 6.1 Wireframe & High-Fidelity Layout
-
-- **Figma Frames (`1280 × 720` + `800 × 720` Compact):**
-  - Wireframe: `02 · Wireframes` → `WF / MainWindow — AdminView`, `WF / MainWindow — AdminView (Compact < 960px)`
-  - High Fidelity: `03 · High Fidelity (Light)` & `04 · High Fidelity (Dark)` → `MainWindow · AdminView (1280x720)`, `MainWindow · AdminView · Compact Responsive (800x720)`
-- **Structure:** Collapsible left navigation rail + right scrollable workspace with status banner, `All Courses` `DataGrid` with inline `Update Credits` (`1–6`), and responsive two-column split (`All Enrolments` on left, `AcademicPolicy` form on right; stacks vertically below `960 px`).
-
-```text
-+----------------------------------------------------------------------+
-| Quorum · AdminView (1280x720)                                _ [] X  |
-+------------------+---------------------------------------------------+
-| | All Courses    | Administrator Console                             |
-|   All Enrolments | [ TextBlock: OperationResult.Message ]            |
-|   Academic Policy| +-----------------------------------------------+ |
-|                  | | All Courses                                   | |
-|                  | | Selected: SEN201 [TextBox:3] [Update Credits] | |
-|                  | | DataGrid: Code|Title|Credits|Cap|Min|Status   | |
-|                  | +-----------------------------------------------+ |
-|                  | +---------------------+ +-----------------------+ |
-|                  | | All Enrolments      | | AcademicPolicy        | |
-|                  | | [ComboBox: Course]  | | Min/Max [TextBox]     | |
-|                  | | DataGrid:           | | Start/End [DatePicker]| |
-| [ Log Out ]      | | Matric|Name|Code    | | [ Save Policy ]       | |
-+------------------+---------------------------------------------------+
-```
-
-### 6.2 WPF Control List
-
-| Region | WPF Controls |
-|---|---|
-| Shell Layout | `Grid` (2-column shell + responsive bottom 2-column split), `StackPanel` (form & rail stacks) |
-| Navigation | `TabControl` (`All Courses`, `All Enrolments`, `Academic Policy`), `Button` (`Log Out`) |
-| Feedback Banner | `TextBlock` (`OperationResult.Message` banner) |
-| All Courses + Edit Credits | `TextBlock` (selected course code), `TextBox` (Credits `1–6`), `Button` (`Update Credits`), `DataGrid` (All Courses) |
-| All Enrolments Card | `ComboBox` (course filter), `DataGrid` (Enrolled Students) |
-| AcademicPolicy Form | `TextBox` (`MinCredits`), `TextBox` (`MaxCredits`), `DatePicker` (`RegistrationStart`), `DatePicker` (`RegistrationEnd`), `Button` (`Save Policy`) |
-
-### 6.3 Button-to-Logic Mapping
-
-| Trigger / Button | Logic Method Called | Post-Action Refresh |
-|---|---|---|
-| `Update Credits` | `CourseService.UpdateCourseCredits(actor, courseCode, credits)` | Reloads `CourseService.BrowseCourses()` + `CourseService.GetCourseStatus(courseCode)` |
-| Select course in `Filter Course` `ComboBox` | `RegistrationService.GetCourseEnrolments(actor, courseCode)` | Updates All Enrolments `DataGrid` |
-| `Save Policy` | `PolicyService.SavePolicy(actor, policy)` | Reloads `PolicyService.GetPolicy()` |
-| `Log Out` | — (UI session clear) | Clears active `User` in `MainWindow` and switches back to `LoginView` |
-
-### 6.4 Lists, Grids & `OperationResult.Message` Placement
-
-- **All Courses `DataGrid`:** `Code`, `Title`, `Credits`, `Capacity`, `MinToRun`, `Status` (from `CourseService.BrowseCourses()` + `CourseService.GetCourseStatus(courseCode)`).
-- **All Enrolments `DataGrid`:** `MatricNumber`, `FullName`, `CourseCode` for the selected course in the `ComboBox` (via `RegistrationService.GetCourseEnrolments(actor, courseCode)`).
-- **`OperationResult.Message`:** Displayed in the top status banner `TextBlock` directly below the `Administrator Console` heading for both `UpdateCourseCredits` and `SavePolicy`.
+### 3.5 `AdminView` (`1280 × 720` + `< 960 px` Compact)
+- **Layout:** `≡ Menu` collapsible left rail (`All Courses`, `All Enrolments`, `Teachers`, `Settings & Policy`, `Log Out`) + `OperationResult.Message` banner + `All Courses` `DataGrid` (`Code`, `Title`, `Credits`, `Capacity`, `MinToRun`, `Status` pill) with inline `Credits (1–6)` `TextBox` + `Update Credits` button + responsive splits for:
+  - `All Enrolments` (`ComboBox` course filter + `MatricNumber`, `FullName`, `CourseCode` `DataGrid`)
+  - `Institution & AcademicPolicy` (`School / University Name` + `Save School`, `MinCredits`, `MaxCredits`, `RegistrationStart` `DatePicker`, `RegistrationEnd` `DatePicker` + `Save Policy`)
+  - `Teachers` (`Full Name`, `Username`, `Password` + `Add Teacher` button, alongside `Registered Teachers` `DataGrid`: `FullName`, `Username`)
+- **Logic Calls:** `CourseService.BrowseCourses()`, `CourseService.UpdateCourseCredits(actor, courseCode, credits)`, `RegistrationService.GetCourseEnrolments(actor, courseCode)`, `PolicyService.GetPolicy()`, `PolicyService.SavePolicy(actor, policy)`, `AuthService.RegisterTeacher(...)`, plus institution/admin onboarding methods via `IQuorumGateway`.

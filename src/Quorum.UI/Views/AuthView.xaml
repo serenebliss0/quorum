@@ -1,35 +1,132 @@
 <UserControl x:Class="Quorum.UI.Views.AuthView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Grid Margin="24">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <Grid Margin="28,16,28,24">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="HeroColumn" Width="1.05*" />
+            <ColumnDefinition x:Name="GapColumn" Width="24" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Hero Panel (uses full 1280x720 desktop real estate cleanly) -->
+        <Border x:Name="HeroPanel"
+                Grid.Column="0"
+                Background="{DynamicResource AccentSubtleBrush}"
+                BorderBrush="{DynamicResource BorderHairlineBrush}"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="36">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="40" Height="40" CornerRadius="10"
+                            Background="{DynamicResource AccentPrimaryBrush}" Margin="0,0,12,0">
+                        <Path Data="M12 3a9 9 0 1 0 6.36 15.36L21 21M12 7a5 5 0 1 0 3.54 8.54"
+                              Stroke="{DynamicResource TextOnAccentBrush}"
+                              StrokeThickness="2.2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                              Width="20" Height="20" Stretch="Uniform" />
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock x:Name="InstitutionTitleText" Text="Quorum University" Style="{StaticResource SectionTextStyle}" />
+                        <TextBlock Text="Quorum Course Registration" Style="{StaticResource CaptionTextStyle}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" VerticalAlignment="Center">
+                    <TextBlock Text="Course registration, built around quorum."
+                               FontFamily="{StaticResource AppFont}"
+                               FontSize="30"
+                               FontWeight="Bold"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               Margin="0,0,0,18" />
+
+                    <Border Style="{StaticResource CardStyle}" Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="Live Course Status" Style="{StaticResource BodyStrongTextStyle}" />
+                            <TextBlock Text="Open until MinToRun is met, Running once quorum is reached, Full at Capacity."
+                                       Style="{StaticResource CaptionTextStyle}" TextWrapping="Wrap" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource CardStyle}" Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="Policy Guardrails" Style="{StaticResource BodyStrongTextStyle}" />
+                            <TextBlock Text="Enforces registration dates, duplicate checks, and MaxCredits automatically."
+                                       Style="{StaticResource CaptionTextStyle}" TextWrapping="Wrap" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Role-Based Workspaces" Style="{StaticResource BodyStrongTextStyle}" />
+                            <TextBlock Text="Dedicated views for Students, Teachers, and Administrators in one window."
+                                       Style="{StaticResource CaptionTextStyle}" TextWrapping="Wrap" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="SetupAdminLinkBtn"
+                            Content="Institution &amp; Admin Setup"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            ToolTipService.InitialShowDelay="800"
+                            ToolTip="Open first-run setup to configure the school and create an Administrator account."
+                            Click="OnOpenSetupClick" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Right Auth Card -->
+        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <Border Style="{StaticResource CardStyle}"
-                    MaxWidth="460"
-                    CornerRadius="10"
-                    Padding="28,24"
-                    HorizontalAlignment="Center"
+                    MaxWidth="480"
+                    CornerRadius="12"
+                    Padding="32,26"
                     VerticalAlignment="Center">
                 <TabControl x:Name="AuthTabs"
                             Background="Transparent"
                             BorderThickness="0"
                             SelectionChanged="OnAuthTabChanged">
+                    <TabControl.Template>
+                        <ControlTemplate TargetType="TabControl">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Border Grid.Row="0"
+                                        Background="{DynamicResource BgSubtleBrush}"
+                                        CornerRadius="8"
+                                        Padding="4"
+                                        HorizontalAlignment="Left"
+                                        Margin="0,0,0,20">
+                                    <TabPanel IsItemsHost="True" />
+                                </Border>
+                                <ContentPresenter Grid.Row="1" ContentSource="SelectedContent" />
+                            </Grid>
+                        </ControlTemplate>
+                    </TabControl.Template>
+
                     <TabControl.Resources>
-                        <Style TargetType="TabPanel">
-                            <Setter Property="HorizontalAlignment" Value="Left" />
-                        </Style>
                         <Style TargetType="TabItem">
                             <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
                             <Setter Property="FontSize" Value="13" />
                             <Setter Property="FontWeight" Value="SemiBold" />
                             <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
-                            <Setter Property="Padding" Value="16,7" />
-                            <Setter Property="Margin" Value="0,0,6,14" />
+                            <Setter Property="Padding" Value="18,8" />
+                            <Setter Property="Margin" Value="0,0,4,0" />
                             <Setter Property="Cursor" Value="Hand" />
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="TabItem">
                                         <Border x:Name="Bd"
-                                                Background="{DynamicResource BgSubtleBrush}"
+                                                Background="Transparent"
                                                 CornerRadius="6"
                                                 Padding="{TemplateBinding Padding}">
                                             <ContentPresenter ContentSource="Header"
@@ -51,15 +148,18 @@
                     <!-- Login Tab -->
                     <TabItem Header="Login">
                         <StackPanel>
-                            <TextBlock Text="Welcome to Quorum"
+                            <TextBlock Text="Welcome back"
                                        Style="{StaticResource TitleTextStyle}"
-                                       Margin="0,0,0,16" />
+                                       Margin="0,0,0,4" />
+                            <TextBlock Text="Sign in as a Student, Teacher, or Administrator."
+                                       Style="{StaticResource CaptionTextStyle}"
+                                       Margin="0,0,0,18" />
 
                             <TextBlock Text="Username" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
-                            <TextBox x:Name="LoginUsernameBox" Style="{StaticResource FluentTextBoxStyle}" Margin="0,0,0,12" />
+                            <TextBox x:Name="LoginUsernameBox" Style="{StaticResource FluentTextBoxStyle}" Margin="0,0,0,14" />
 
                             <TextBlock Text="Password" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
-                            <PasswordBox x:Name="LoginPasswordBox" Style="{StaticResource FluentPasswordBoxStyle}" Margin="0,0,0,14" />
+                            <PasswordBox x:Name="LoginPasswordBox" Style="{StaticResource FluentPasswordBoxStyle}" Margin="0,0,0,16" />
 
                             <Border x:Name="LoginFeedbackBar"
                                     Style="{StaticResource InfoBarStyle}"
@@ -80,7 +180,7 @@
                     <!-- Sign Up Tab -->
                     <TabItem Header="Sign Up">
                         <StackPanel>
-                            <TextBlock Text="Create Account"
+                            <TextBlock Text="Create account"
                                        Style="{StaticResource TitleTextStyle}"
                                        Margin="0,0,0,14" />
 
