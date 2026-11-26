@@ -35,6 +35,7 @@ Teacher --> UC_TeacherEnrol
 
 Administrator --> UC_Login
 Administrator --> UC_Browse
+Administrator --> UC_CreateCourse
 Administrator --> UC_EditCredits
 Administrator --> UC_AdminEnrol
 Administrator --> UC_Policy

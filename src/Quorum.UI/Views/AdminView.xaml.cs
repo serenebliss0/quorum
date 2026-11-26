@@ -115,7 +115,12 @@ public partial class AdminView : UserControl, IResponsiveView
 
     private void OnCourseFilterChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (CourseFilterCombo.SelectedItem is not CourseDisplayItem selected) return;
+        if (CourseFilterCombo.SelectedItem is not CourseDisplayItem selected)
+        {
+            AllEnrolmentsGrid.ItemsSource = null;
+            return;
+        }
+
         AllEnrolmentsGrid.ItemsSource = _gateway.GetCourseEnrolments(_currentUser, selected.Code);
     }
 
@@ -181,8 +186,8 @@ public partial class AdminView : UserControl, IResponsiveView
         {
             MinCredits = minCredits,
             MaxCredits = maxCredits,
-            RegistrationStart = RegistrationStartPicker.SelectedDate.Value,
-            RegistrationEnd = RegistrationEndPicker.SelectedDate.Value,
+            RegistrationStart = RegistrationStartPicker.SelectedDate.Value.Date,
+            RegistrationEnd = RegistrationEndPicker.SelectedDate.Value.Date.AddDays(1).AddSeconds(-1),
         };
 
         OperationResult result = _gateway.SavePolicy(_currentUser, policy);

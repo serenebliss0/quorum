@@ -32,9 +32,7 @@ public sealed record TeacherDisplayItem(
     string Username);
 
 /// <summary>
-/// UI-facing gateway matching Class Diagram B service contracts plus institution/admin onboarding.
-/// AuthService and Admin/Teacher user provisioning run live against IDataStore;
-/// CourseService, RegistrationService, and PolicyService calls bridge to Increment 2 Logic once implemented.
+/// UI-facing gateway delegating all operations to Quorum.Logic services and IDataStore.
 /// </summary>
 public interface IQuorumGateway
 {
@@ -69,34 +67,18 @@ public sealed class QuorumGateway : IQuorumGateway
 {
     private readonly IDataStore _store;
     private readonly AuthService _authService;
+    private readonly PolicyService _policyService;
+    private readonly CourseService _courseService;
+    private readonly RegistrationService _registrationService;
     private readonly string _institutionPath;
-
-    private readonly List<CourseDisplayItem> _previewCourses =
-    [
-        new("SEN201", "Software Engineering", 3, "18 / 40", 40, 10, "Running"),
-        new("CSC201", "Data Structures", 3, "40 / 40", 40, 10, "Full"),
-        new("MTH201", "Linear Algebra", 3, "2 / 35", 35, 8, "Open"),
-    ];
-
-    private readonly List<RegistrationDisplayItem> _previewRegistrations =
-    [
-        new("SEN201", "Software Engineering", 3, "2026-11-26"),
-        new("CSC202", "Operating Systems", 3, "2026-11-26"),
-        new("GST201", "Academic Writing", 3, "2026-11-26"),
-    ];
-
-    private readonly AcademicPolicy _previewPolicy = new()
-    {
-        MinCredits = 12,
-        MaxCredits = 24,
-        RegistrationStart = new DateTime(2026, 11, 1),
-        RegistrationEnd = new DateTime(2026, 12, 4),
-    };
 
     public QuorumGateway()
     {
         _store = new JsonDataStore();
         _authService = new AuthService(_store);
+        _policyService = new PolicyService(_store);
+        _courseService = new CourseService(_store);
+        _registrationService = new RegistrationService(_store, _policyService);
 
         string dataDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -176,8 +158,23 @@ public sealed class QuorumGateway : IQuorumGateway
         _store.SaveUsers(users);
         WriteInstitutionName(institutionName.Trim());
 
+        // Seed a valid default AcademicPolicy on first setup so registrations are usable immediately.
+        AcademicPolicy existingPolicy = _policyService.GetPolicy();
+        if (existingPolicy.RegistrationEnd <= existingPolicy.RegistrationStart)
+        {
+            _policyService.SavePolicy(admin, CreateDefaultPolicy());
+        }
+
         return OperationResult.Success("Institution and Administrator account configured.");
     }
+
+    private static AcademicPolicy CreateDefaultPolicy() => new()
+    {
+        MinCredits = 12,
+        MaxCredits = 24,
+        RegistrationStart = DateTime.Today,
+        RegistrationEnd = DateTime.Today.AddDays(30).AddDays(1).AddSeconds(-1),
+    };
 
     private void WriteInstitutionName(string name)
     {
@@ -214,44 +211,77 @@ public sealed class QuorumGateway : IQuorumGateway
     }
 
     public List<CourseDisplayItem> BrowseCourses()
-        => [.. _previewCourses];
+        => MapCourses(_courseService.BrowseCourses());
 
     public List<RegistrationDisplayItem> GetStudentRegistrations(string studentId)
-        => [.. _previewRegistrations];
+    {
+        List<Registration> regs = _registrationService.GetStudentRegistrations(studentId);
+        List<Course> courses = _courseService.BrowseCourses();
+
+        return regs.Select(r =>
+        {
+            Course? course = courses.FirstOrDefault(c =>
+                c.Code.Equals(r.CourseCode, StringComparison.OrdinalIgnoreCase));
+            return new RegistrationDisplayItem(
+                r.CourseCode,
+                course?.Title ?? r.CourseCode,
+                course?.Credits ?? 0,
+                r.RegisteredAt.ToString("yyyy-MM-dd HH:mm"));
+        }).ToList();
+    }
 
     public bool IsBelowMinCredits(string studentId)
-        => _previewRegistrations.Sum(r => r.Credits) < _previewPolicy.MinCredits;
+        => _registrationService.IsBelowMinCredits(studentId);
 
     public OperationResult Register(string studentId, string courseCode)
-        => OperationResult.Failure("RegistrationService pending Increment 2 wiring.");
+        => _registrationService.Register(studentId, courseCode);
 
     public OperationResult Drop(string studentId, string courseCode)
-        => OperationResult.Failure("RegistrationService pending Increment 2 wiring.");
+        => _registrationService.Drop(studentId, courseCode);
 
     public List<CourseDisplayItem> GetTeacherCourses(User actor)
-        =>
-        [
-            new("SEN201", "Software Engineering", 3, "18 / 40", 40, 10, "Running"),
-            new("SEN204", "Formal Methods", 3, "4 / 30", 30, 8, "Open"),
-        ];
+        => MapCourses(_courseService.GetTeacherCourses(actor));
 
     public OperationResult CreateCourse(User actor, string code, string title, int capacity, int minToRun)
-        => OperationResult.Failure("CourseService pending Increment 2 wiring.");
+        => _courseService.CreateCourse(actor, code, title, capacity, minToRun);
 
     public List<EnrolmentDisplayItem> GetCourseEnrolments(User actor, string courseCode)
-        =>
-        [
-            new("24/0102", "AJAYI Oluwasemire", "semire.ajayi", courseCode),
-            new("24/0118", "OKEKE Kenechukwu", "kene.okeke", courseCode),
-            new("24/0145", "OKIKE Tochukwu", "tochu.okike", courseCode),
-        ];
+    {
+        return _registrationService.GetCourseEnrolments(actor, courseCode)
+            .Select(s => new EnrolmentDisplayItem(s.MatricNumber, s.FullName, s.Username, courseCode))
+            .ToList();
+    }
 
     public OperationResult UpdateCourseCredits(User actor, string courseCode, int credits)
-        => OperationResult.Failure("CourseService pending Increment 2 wiring.");
+        => _courseService.UpdateCourseCredits(actor, courseCode, credits);
 
     public AcademicPolicy GetPolicy()
-        => _previewPolicy;
+    {
+        AcademicPolicy policy = _policyService.GetPolicy();
+        return policy.RegistrationEnd <= policy.RegistrationStart
+            ? CreateDefaultPolicy()
+            : policy;
+    }
 
     public OperationResult SavePolicy(User actor, AcademicPolicy policy)
-        => OperationResult.Failure("PolicyService pending Increment 2 wiring.");
+        => _policyService.SavePolicy(actor, policy);
+
+    private List<CourseDisplayItem> MapCourses(List<Course> courses)
+    {
+        List<Registration> regs = _store.LoadRegistrations();
+        return courses.Select(c =>
+        {
+            int enrolled = regs.Count(r =>
+                r.CourseCode.Equals(c.Code, StringComparison.OrdinalIgnoreCase));
+            string status = _courseService.GetCourseStatus(c.Code).ToString();
+            return new CourseDisplayItem(
+                c.Code,
+                c.Title,
+                c.Credits,
+                $"{enrolled} / {c.Capacity}",
+                c.Capacity,
+                c.MinToRun,
+                status);
+        }).ToList();
+    }
 }

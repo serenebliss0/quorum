@@ -128,15 +128,11 @@ Then complete system and acceptance testing on 1 December, video and PDF on 2–
 
 ## 9. Current state
 
-- **On `feat/ui-polish` (branching from `main` `9ee5673`):**
-  - Updated `Quorum.UI` + Figma (`https://www.figma.com/design/P2iXhyeWO3VTTAM2oZlScS`) + `docs/design/ui-spec.md`:
-    - Added `SplashView` (`1.3 s` brief splash with placeholder geometric logo).
-    - Added first-run `AdminSetupView` (School/University Name + primary Administrator provisioning into `IDataStore` when no Admin exists yet).
-    - Replaced tiny centered auth box with full-width split `AuthView` + fixed clipped `Login`/`Sign Up` `TabControl` tabs.
-    - Enabled automatic Windows system Light/Dark theme detection (`ThemeManager.ApplySystemTheme()`).
-    - Added manual `≡ Menu` collapsible sidebar toggles across `StudentView`, `TeacherView`, `AdminView`, plus `800 ms` hover `ToolTip`s (explaining `MinToRun`, `Capacity`, `Credits`, `Status`, and policy fields).
-    - Added `Institution Settings` (`School / University Name`) and `Add Teacher` + `Registered Teachers` grid inside `AdminView` (live-wired via `IQuorumGateway`).
-- **Remaining:** Implement Increment 2 (`CourseService`, `RegistrationService`, `PolicyService`, `CourseStatus`) in `Quorum.Logic`, align `SRS.md` / `Quorum.Data` / `Quorum.Logic` if Institution settings & Admin teacher provisioning are promoted into Logic, wire `QuorumGateway` to live Logic services, remove template `Class1.cs` files, expand tests (including JSON persistence tests), collect matriculation numbers, and record demo video + final PDF report.
+- **On `feat/ui-polish` (`a8b3065`, `2e84cd9`, and live UI wiring):**
+  - Implemented Increment 2 (`CourseStatus`, `CourseService`, `PolicyService`, `RegistrationService`) and `Increment2ServiceTests` (`35 / 35` unit tests passing).
+  - Wired `QuorumGateway` directly to live `AuthService`, `CourseService`, `PolicyService`, and `RegistrationService` (including default `AcademicPolicy` seeding on first-run `SetupInstitutionAndAdmin`, inclusive `RegistrationEnd` day-end handling, and `CourseService.CreateCourse` allowing both `Teacher` and `Administrator`).
+  - Synced `docs/design/uc-use-case.puml` (`Administrator --> UC_CreateCourse`), `docs/design/ui-spec.md`, and Figma (`https://www.figma.com/design/P2iXhyeWO3VTTAM2oZlScS`).
+- **Remaining:** Align `SRS.md` / `Quorum.Data` / `Quorum.Logic` if Institution settings & Admin teacher provisioning are promoted into Logic, re-render `Use Case Diagram.png` if desired, remove template `Class1.cs` files, add dedicated `JsonDataStore` persistence tests, collect matriculation numbers, and record demo video + final PDF report.
 - Do not report an item as completed unless there is evidence.
 
 ## 10. Session log (append only)
@@ -181,3 +177,4 @@ Then complete system and acceptance testing on 1 December, video and PDF on 2–
 - **2026-11-25:** Increment 1 implementation has been pushed, but completion is not yet verified. `dotnet test` has not been confirmed. Dedicated JSON persistence tests are still required. Administrator provisioning has also not been implemented.
 - **2026-11-26:** Built single-window Fluent WPF UI (`MainWindow` 1280x720, Light/Dark themes, responsive `< 960 px` views, `IQuorumGateway`), moved `AuthServiceTests` to `tests/Quorum.Tests/UnitTest1.cs`, added `.github/workflows/ci.yml` and `.github/workflows/release.yml`, verified `dotnet build` & `dotnet test` (`11 / 11` passed), and merged PR #1 into `main` (`132f9b6`).
 - **2026-11-26 (PM-approved UX & onboarding update on `feat/ui-polish`):** Added `SplashView`, first-run `AdminSetupView` (School/University Name + Administrator provisioning into `IDataStore`), split `AuthView` with unclipped `TabControl` tabs, Windows system theme auto-detection (`AppsUseLightTheme`), `≡ Menu` collapsible navigation rails, `800 ms` hover tooltips (explaining `MinToRun`, `Capacity`, `Credits`, `Status`, and policy fields), and `Institution Settings` + `Add Teacher` in `AdminView`. Synced Figma (`02 · Wireframes`, `03 · High Fidelity (Light)`, `04 · High Fidelity (Dark)`) and `docs/design/ui-spec.md`.
+- **2026-11-26 (Increment 2 live integration on `feat/ui-polish`):** Implemented Increment 2 (`a8b3065`, `2e84cd9`: `CourseStatus`, `CourseService`, `PolicyService`, `RegistrationService`, `Increment2ServiceTests`, `35 / 35` tests passing). Replaced preview stubs in `QuorumGateway` with live Increment 2 services, seeded default `AcademicPolicy` on first-run setup, fixed inclusive `RegistrationEnd` day-end time in `AdminView`, and updated `docs/design/uc-use-case.puml` (`Administrator --> UC_CreateCourse`).
