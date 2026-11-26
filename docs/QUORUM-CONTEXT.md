@@ -128,9 +128,12 @@ Then complete system and acceptance testing on 1 December, video and PDF on 2–
 
 ## 9. Current state
 
-- Solution scaffold committed and pushed (Quorum.slnx; src/Quorum.Data, Quorum.Logic, Quorum.UI; tests/Quorum.Tests). Builds on .NET 10.
-- Template placeholder files (Class1.cs, UnitTest1.cs) still to be replaced.
-- Next: Increment 1 code (models, IDataStore, JsonDataStore, AuthService, tests); system-modelling diagrams; GitHub Issues; matriculation numbers.
+- **On `main` (`132f9b6`):**
+  - Docs & design: UML/Architecture diagrams (`.puml` + `.png`) in `docs/design/`, `docs/requirements/SRS.md`, `docs/testing/test-plan.md`, `docs/design/ui-spec.md`, and Figma design (`https://www.figma.com/design/P2iXhyeWO3VTTAM2oZlScS`).
+  - Increment 1 (`Quorum.Data`, `Quorum.Logic`, `Quorum.Tests`): Models (`User`, `Student`, `Course`, `Registration`, `AcademicPolicy`, `UserRole`), `IDataStore`, `JsonDataStore` (`users.json`, `courses.json`, `registrations.json`, `policy.json` in `%LocalAppData%\Quorum`), `OperationResult`, `PasswordHasher`, `AuthService`, and 11 passing xUnit tests (`tests/Quorum.Tests/UnitTest1.cs` + `InMemoryDataStore`).
+  - WPF UI (`Quorum.UI`, merged via PR #1): Single-window Fluent shell (`MainWindow`, `1280x720`, `MinWidth 800`, `MinHeight 600`), Light/Dark theme switching, `< 960 px` responsive layout (`AuthView`, `StudentView`, `TeacherView`, `AdminView`), `AuthView` live-wired to `AuthService`, and `IQuorumGateway` holding preview stubs for Increment 2 services.
+  - CI/CD: `.github/workflows/ci.yml` (`.NET 10` Release build & test on `windows-latest`) and `.github/workflows/release.yml` (`v*` tag self-contained `win-x64` publish + GitHub Release).
+- **Remaining:** Implement Increment 2 (`CourseService`, `RegistrationService`, `PolicyService`, `CourseStatus`) in `Quorum.Logic`, wire `QuorumGateway` to live Logic services, remove template `Class1.cs` files, expand tests, collect matriculation numbers, and record demo video + final PDF report.
 - Do not report an item as completed unless there is evidence.
 
 ## 10. Session log (append only)
@@ -153,3 +156,5 @@ Then complete system and acceptance testing on 1 December, video and PDF on 2–
 - **2026-11-21:** All UML diagrams accepted and stored in docs/design (use case, class A and B, three sequence diagrams, activity, architecture). Class diagram B method names are the locked Logic-layer contract. Next: Increment 1 code.
 
 - **2026-11-21:** Drafted `docs/requirements/SRS.md` and `docs/testing/test-plan.md` from Section 4 of this context and the accepted PlantUML diagrams in `docs/design`. Recorded the functional scope, service validation branches, credits 1–6, policy bounds, actor authorisation, duplicate-username and wrong-password cases, password hashing and JSON persistence. Test-plan Actual Result and Pass/Fail columns are intentionally blank pending real execution.
+- **2026-11-25:** Implemented Increment 1 (`UserRole`, models, `IDataStore`, `JsonDataStore`, `OperationResult`, `PasswordHasher`, `AuthService`, and 11 unit tests). Updated Figma UI and `docs/design/ui-spec.md` to a single `MainWindow` (`1280x720`, `< 960 px` responsive compact mode) with swappable views and Light/Dark Fluent tokens. Built `Quorum.UI` on `feat/wpf-ui` (`AuthView` live-wired; `IQuorumGateway` stubs for Increment 2).
+- **2026-11-26:** Added `.github/workflows/ci.yml` (build & test on `windows-latest`) and `.github/workflows/release.yml` (tag `v*` self-contained `win-x64` GitHub Release). Merged `feat/wpf-ui` into `main` via PR #1 and updated `QUORUM-CONTEXT.md`.
