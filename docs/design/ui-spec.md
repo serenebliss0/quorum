@@ -72,9 +72,11 @@ Secondary & Derived Tokens:
 - **Action:** Calls `SetupInstitutionAndAdmin(...)`, persists Administrator (`UserRole.Administrator`) via `PasswordHasher` + `IDataStore` and `InstitutionName`, then signs straight into `AdminView`.
 
 ### 3.2 `AuthView` — `Login` & `Sign Up` (`1280 × 720`)
-- **Layout:** Two-column split (`1.05*` Institution Hero + Quorum overview cards + `Institution & Admin Setup` button; `1*` Auth form card with unclipped custom `TabControl` pill track).
-- **Controls:** `TabControl` (`Login` | `Sign Up`), `ComboBox` (`Student` | `Teacher`), `TextBox` (`Full Name`, `Username`, `Matric Number` when `Student`), `PasswordBox` (`Password`), `TextBlock` (`OperationResult.Message` / login error banner), `Button` (`Sign In`, `Create Account`).
-- **Logic Calls:** `AuthService.Login(username, password)`, `AuthService.RegisterStudent(...)`, `AuthService.RegisterTeacher(...)`.
+- **Layout:** Two-column split (`1.05*` Institution Hero + Quorum overview cards + `Administrator Login` / `Institution & Admin Setup` shortcut button; `1*` Auth form card with unclipped custom `TabControl` pill track).
+- **Controls:**
+  - `Login` tab: `ComboBox` (`Sign in as`: `Student` | `Teacher` | `Administrator`), `TextBox` (`Username`), `PasswordBox` (`Password`), `TextBlock` (role/error banner), `Button` (`Sign In`).
+  - `Sign Up` tab: `ComboBox` (`Account Type`: `Student` | `Teacher`), `TextBox` (`Full Name`, `Username`, `Matric Number` when `Student`), `PasswordBox` (`Password`), `TextBlock` (`OperationResult.Message`), `Button` (`Create Account`).
+- **Logic Calls:** `AuthService.Login(username, password)` (verifying selected role matches `user.Role`), `AuthService.RegisterStudent(...)`, `AuthService.RegisterTeacher(...)`.
 
 ### 3.3 `StudentView` (`1280 × 720` + `< 960 px` Compact)
 - **Layout:** `≡ Menu` collapsible left rail (`220 px` / `56 px`, `Browse Courses`, `My Courses`, `Credit Load`, `Log Out`) + scrollable workspace with `OperationResult.Message` banner, amber `IsBelowMinCredits` warning banner, `Available Courses` `DataGrid` (`Code`, `Title`, `Credits`, `Capacity`, `Status` pill) + `Register` button, and `My Courses` `DataGrid` (`Code`, `Title`, `Credits`, `RegisteredAt`) + `Drop` button.

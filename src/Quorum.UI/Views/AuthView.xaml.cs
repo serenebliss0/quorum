@@ -26,9 +26,9 @@ public partial class AuthView : UserControl, IResponsiveView
         _onOpenAdminSetup = onOpenAdminSetup;
 
         InstitutionTitleText.Text = _gateway.GetInstitutionName();
-        SetupAdminLinkBtn.Visibility = _gateway.HasAdminAccount()
-            ? Visibility.Collapsed
-            : Visibility.Visible;
+        AdminShortcutButton.Content = _gateway.HasAdminAccount()
+            ? "Administrator Login"
+            : "Institution & Admin Setup";
     }
 
     public void SetCompactMode(bool isCompact)
@@ -46,6 +46,25 @@ public partial class AuthView : UserControl, IResponsiveView
             : $"Quorum  ·  {_gateway.GetInstitutionName()}  ·  Create Account");
     }
 
+    private void OnLoginRoleChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!IsLoaded) return;
+
+        LoginSubtitleText.Text = GetSelectedLoginRole() switch
+        {
+            UserRole.Administrator => "Sign in with your provisioned Administrator credentials.",
+            UserRole.Teacher => "Sign in to manage your courses and view enrolments.",
+            _ => "Sign in to browse courses and manage registrations.",
+        };
+    }
+
+    private UserRole GetSelectedLoginRole() => LoginRoleComboBox.SelectedIndex switch
+    {
+        1 => UserRole.Teacher,
+        2 => UserRole.Administrator,
+        _ => UserRole.Student,
+    };
+
     private void OnRoleSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (!IsLoaded) return;
@@ -59,6 +78,14 @@ public partial class AuthView : UserControl, IResponsiveView
         if (user is null)
         {
             LoginFeedbackText.Text = "Invalid username or password.";
+            LoginFeedbackBar.Visibility = Visibility.Visible;
+            return;
+        }
+
+        UserRole selectedRole = GetSelectedLoginRole();
+        if (user.Role != selectedRole)
+        {
+            LoginFeedbackText.Text = $"That account is a {user.Role}. Switch 'Sign in as' to {user.Role} to continue.";
             LoginFeedbackBar.Visibility = Visibility.Visible;
             return;
         }
@@ -94,5 +121,16 @@ public partial class AuthView : UserControl, IResponsiveView
         }
     }
 
-    private void OnOpenSetupClick(object sender, RoutedEventArgs e) => _onOpenAdminSetup();
+    private void OnAdminShortcutClick(object sender, RoutedEventArgs e)
+    {
+        if (!_gateway.HasAdminAccount())
+        {
+            _onOpenAdminSetup();
+            return;
+        }
+
+        AuthTabs.SelectedIndex = 0;
+        LoginRoleComboBox.SelectedIndex = 2;
+        LoginUsernameBox.Focus();
+    }
 }

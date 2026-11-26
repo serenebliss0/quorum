@@ -8,7 +8,7 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <!-- Left Hero Panel (uses full 1280x720 desktop real estate cleanly) -->
+        <!-- Left Hero Panel -->
         <Border x:Name="HeroPanel"
                 Grid.Column="0"
                 Background="{DynamicResource AccentSubtleBrush}"
@@ -72,12 +72,12 @@
                 </StackPanel>
 
                 <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button x:Name="SetupAdminLinkBtn"
-                            Content="Institution &amp; Admin Setup"
+                    <Button x:Name="AdminShortcutButton"
+                            Content="Administrator Login"
                             Style="{StaticResource SecondaryButtonStyle}"
                             ToolTipService.InitialShowDelay="800"
-                            ToolTip="Open first-run setup to configure the school and create an Administrator account."
-                            Click="OnOpenSetupClick" />
+                            ToolTip="Switch directly to Administrator sign-in or first-run institution setup."
+                            Click="OnAdminShortcutClick" />
                 </StackPanel>
             </Grid>
         </Border>
@@ -151,12 +151,26 @@
                             <TextBlock Text="Welcome back"
                                        Style="{StaticResource TitleTextStyle}"
                                        Margin="0,0,0,4" />
-                            <TextBlock Text="Sign in as a Student, Teacher, or Administrator."
+                            <TextBlock x:Name="LoginSubtitleText"
+                                       Text="Choose your role and sign in to Quorum."
                                        Style="{StaticResource CaptionTextStyle}"
-                                       Margin="0,0,0,18" />
+                                       Margin="0,0,0,16" />
+
+                            <TextBlock Text="Sign in as" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
+                            <ComboBox x:Name="LoginRoleComboBox"
+                                      Style="{StaticResource FluentComboBoxStyle}"
+                                      SelectedIndex="0"
+                                      SelectionChanged="OnLoginRoleChanged"
+                                      ToolTipService.InitialShowDelay="800"
+                                      ToolTip="Select Student, Teacher, or Administrator before signing in."
+                                      Margin="0,0,0,12">
+                                <ComboBoxItem Content="Student" />
+                                <ComboBoxItem Content="Teacher" />
+                                <ComboBoxItem Content="Administrator" />
+                            </ComboBox>
 
                             <TextBlock Text="Username" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
-                            <TextBox x:Name="LoginUsernameBox" Style="{StaticResource FluentTextBoxStyle}" Margin="0,0,0,14" />
+                            <TextBox x:Name="LoginUsernameBox" Style="{StaticResource FluentTextBoxStyle}" Margin="0,0,0,12" />
 
                             <TextBlock Text="Password" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
                             <PasswordBox x:Name="LoginPasswordBox" Style="{StaticResource FluentPasswordBoxStyle}" Margin="0,0,0,16" />
