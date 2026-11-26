@@ -13,18 +13,35 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <!-- Left Navigation Rail -->
-        <Grid Grid.Column="0" Margin="12,6,12,0">
+        <!-- Left Collapsible Navigation Rail -->
+        <Grid Grid.Column="0" Margin="10,6,10,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0">
+                <Button Style="{StaticResource NavItemButtonStyle}"
+                        Margin="0,0,0,6"
+                        ToolTipService.InitialShowDelay="800"
+                        ToolTip="Collapse or expand navigation menu"
+                        Click="OnToggleNavClick">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Path Data="M3 6h18M3 12h18M3 18h18"
+                              Stroke="{DynamicResource TextSecondaryBrush}" StrokeThickness="1.7"
+                              Width="15" Height="15" Stretch="Uniform" Margin="4,0,0,0" />
+                        <TextBlock x:Name="CollapseNavLabel" Text="Menu"
+                                   Style="{StaticResource CaptionTextStyle}"
+                                   Margin="12,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
                 <Button x:Name="BrowseNavBtn"
                         Style="{StaticResource NavItemButtonStyle}"
                         Background="{DynamicResource BgSurfaceBrush}"
                         Margin="0,0,0,4"
+                        ToolTipService.InitialShowDelay="800"
+                        ToolTip="Browse Available Courses"
                         Click="OnSelectBrowseNav">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Border x:Name="BrowseIndicator" Width="3" Height="16" CornerRadius="2"
@@ -40,6 +57,8 @@
 
                 <Button x:Name="MyCoursesNavBtn"
                         Style="{StaticResource NavItemButtonStyle}"
+                        ToolTipService.InitialShowDelay="800"
+                        ToolTip="View My Registered Courses"
                         Click="OnSelectMyCoursesNav">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Border x:Name="MyCoursesIndicator" Width="3" Height="16" CornerRadius="2"
@@ -58,7 +77,9 @@
                 <Border x:Name="CreditSummaryCard"
                         Style="{StaticResource CardStyle}"
                         Padding="12,10"
-                        Margin="0,0,0,10">
+                        Margin="0,0,0,10"
+                        ToolTipService.InitialShowDelay="800"
+                        ToolTip="Current registered credits vs configured MaxCredits limit.">
                     <StackPanel>
                         <TextBlock Text="Credit Load" Style="{StaticResource CaptionTextStyle}" />
                         <TextBlock x:Name="CreditTotalText"
@@ -71,6 +92,8 @@
 
                 <Button Style="{StaticResource NavItemButtonStyle}"
                         Background="{DynamicResource BgSurfaceBrush}"
+                        ToolTipService.InitialShowDelay="800"
+                        ToolTip="Log Out"
                         Click="OnLogoutClick">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Path Data="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"
@@ -104,7 +127,9 @@
                     <Border x:Name="MinCreditsWarningBanner"
                             Style="{StaticResource WarningBarStyle}"
                             Visibility="Collapsed"
-                            Margin="0,0,0,12">
+                            Margin="0,0,0,12"
+                            ToolTipService.InitialShowDelay="800"
+                            ToolTip="Advisory notice only. Registration is not blocked below MinCredits.">
                         <TextBlock x:Name="MinCreditsWarningText"
                                    Style="{StaticResource BodyTextStyle}"
                                    Foreground="{DynamicResource WarningFgBrush}"
@@ -123,6 +148,8 @@
                                            Style="{StaticResource SectionTextStyle}" VerticalAlignment="Center" />
                                 <Button Grid.Column="1" Content="Register"
                                         Style="{StaticResource PrimaryButtonStyle}"
+                                        ToolTipService.InitialShowDelay="800"
+                                        ToolTip="Enrol in the selected course (checks registration window, duplicates, capacity, and MaxCredits)."
                                         Click="OnRegisterClick" />
                             </Grid>
 
@@ -136,7 +163,9 @@
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <Border CornerRadius="999" Padding="10,3" HorizontalAlignment="Left"
-                                                        Background="{Binding Status, Converter={StaticResource PillBgConverter}}">
+                                                        Background="{Binding Status, Converter={StaticResource PillBgConverter}}"
+                                                        ToolTipService.InitialShowDelay="800"
+                                                        ToolTip="Open: below MinToRun · Running: quorum met · Full: at Capacity.">
                                                     <TextBlock Text="{Binding Status}" FontSize="11" FontWeight="SemiBold"
                                                                Foreground="{Binding Status, Converter={StaticResource PillFgConverter}}" />
                                                 </Border>
@@ -160,6 +189,8 @@
                                            Style="{StaticResource SectionTextStyle}" VerticalAlignment="Center" />
                                 <Button Grid.Column="1" Content="Drop"
                                         Style="{StaticResource DangerButtonStyle}"
+                                        ToolTipService.InitialShowDelay="800"
+                                        ToolTip="Remove the selected course from your current registrations."
                                         Click="OnDropClick" />
                             </Grid>
 

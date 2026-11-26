@@ -13,18 +13,35 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <!-- Left Navigation Rail -->
-        <Grid Grid.Column="0" Margin="12,6,12,0">
+        <!-- Left Collapsible Navigation Rail -->
+        <Grid Grid.Column="0" Margin="10,6,10,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0">
+                <Button Style="{StaticResource NavItemButtonStyle}"
+                        Margin="0,0,0,6"
+                        ToolTipService.InitialShowDelay="800"
+                        ToolTip="Collapse or expand navigation menu"
+                        Click="OnToggleNavClick">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Path Data="M3 6h18M3 12h18M3 18h18"
+                              Stroke="{DynamicResource TextSecondaryBrush}" StrokeThickness="1.7"
+                              Width="15" Height="15" Stretch="Uniform" Margin="4,0,0,0" />
+                        <TextBlock x:Name="CollapseNavLabel" Text="Menu"
+                                   Style="{StaticResource CaptionTextStyle}"
+                                   Margin="12,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
                 <Button x:Name="CoursesNavBtn"
                         Style="{StaticResource NavItemButtonStyle}"
                         Background="{DynamicResource BgSurfaceBrush}"
                         Margin="0,0,0,4"
+                        ToolTipService.InitialShowDelay="800"
+                        ToolTip="All Courses &amp; Credits"
                         Click="OnSelectCoursesNav">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Border x:Name="CoursesIndicator" Width="3" Height="16" CornerRadius="2"
@@ -41,6 +58,8 @@
                 <Button x:Name="EnrolmentsNavBtn"
                         Style="{StaticResource NavItemButtonStyle}"
                         Margin="0,0,0,4"
+                        ToolTipService.InitialShowDelay="800"
+                        ToolTip="All Course Enrolments"
                         Click="OnSelectEnrolmentsNav">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Border x:Name="EnrolmentsIndicator" Width="3" Height="16" CornerRadius="2"
@@ -54,8 +73,28 @@
                     </StackPanel>
                 </Button>
 
+                <Button x:Name="TeachersNavBtn"
+                        Style="{StaticResource NavItemButtonStyle}"
+                        Margin="0,0,0,4"
+                        ToolTipService.InitialShowDelay="800"
+                        ToolTip="Add &amp; Manage Teachers"
+                        Click="OnSelectTeachersNav">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border x:Name="TeachersIndicator" Width="3" Height="16" CornerRadius="2"
+                                Background="Transparent" Margin="0,0,10,0" />
+                        <Path Data="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M19 8v6M22 11h-6M9 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"
+                              Stroke="{DynamicResource TextSecondaryBrush}" StrokeThickness="1.6"
+                              Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Center" />
+                        <TextBlock x:Name="TeachersNavLabel" Text="Teachers"
+                                   Style="{StaticResource BodyTextStyle}"
+                                   Margin="10,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
                 <Button x:Name="PolicyNavBtn"
                         Style="{StaticResource NavItemButtonStyle}"
+                        ToolTipService.InitialShowDelay="800"
+                        ToolTip="Institution Settings &amp; AcademicPolicy"
                         Click="OnSelectPolicyNav">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Border x:Name="PolicyIndicator" Width="3" Height="16" CornerRadius="2"
@@ -63,7 +102,7 @@
                         <Path Data="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"
                               Stroke="{DynamicResource TextSecondaryBrush}" StrokeThickness="1.6"
                               Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Center" />
-                        <TextBlock x:Name="PolicyNavLabel" Text="Academic Policy"
+                        <TextBlock x:Name="PolicyNavLabel" Text="Settings &amp; Policy"
                                    Style="{StaticResource BodyTextStyle}"
                                    Margin="10,0,0,0" VerticalAlignment="Center" />
                     </StackPanel>
@@ -73,6 +112,8 @@
             <Button Grid.Row="1"
                     Style="{StaticResource NavItemButtonStyle}"
                     Background="{DynamicResource BgSurfaceBrush}"
+                    ToolTipService.InitialShowDelay="800"
+                    ToolTip="Log Out"
                     Click="OnLogoutClick">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Path Data="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"
@@ -118,9 +159,13 @@
                                 <TextBox x:Name="EditCreditsBox"
                                          Width="80"
                                          Style="{StaticResource FluentTextBoxStyle}"
+                                         ToolTipService.InitialShowDelay="800"
+                                         ToolTip="Whole number from 1 to 6. Only Administrators can edit course credits."
                                          Margin="0,0,10,0" />
                                 <Button Content="Update Credits"
                                         Style="{StaticResource PrimaryButtonStyle}"
+                                        ToolTipService.InitialShowDelay="800"
+                                        ToolTip="Saves the updated credit value (1–6) for the selected course."
                                         Click="OnUpdateCreditsClick" />
                             </StackPanel>
 
@@ -137,7 +182,9 @@
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <Border CornerRadius="999" Padding="10,3" HorizontalAlignment="Left"
-                                                        Background="{Binding Status, Converter={StaticResource PillBgConverter}}">
+                                                        Background="{Binding Status, Converter={StaticResource PillBgConverter}}"
+                                                        ToolTipService.InitialShowDelay="800"
+                                                        ToolTip="Open: below MinToRun · Running: quorum met · Full: at Capacity.">
                                                     <TextBlock Text="{Binding Status}" FontSize="11" FontWeight="SemiBold"
                                                                Foreground="{Binding Status, Converter={StaticResource PillFgConverter}}" />
                                                 </Border>
@@ -149,10 +196,10 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Responsive Split: All Enrolments + AcademicPolicy -->
-                    <Grid x:Name="BottomSplitGrid">
+                    <!-- Responsive Split 1: All Enrolments + Settings & AcademicPolicy -->
+                    <Grid Margin="0,0,0,14">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition x:Name="SplitColLeft" Width="*" />
+                            <ColumnDefinition Width="*" />
                             <ColumnDefinition x:Name="SplitColGap" Width="14" />
                             <ColumnDefinition x:Name="SplitColRight" Width="*" />
                         </Grid.ColumnDefinitions>
@@ -187,21 +234,29 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- AcademicPolicy Card -->
+                        <!-- Institution Settings + AcademicPolicy Card -->
                         <Border x:Name="PolicyCard"
                                 Grid.Row="0" Grid.Column="2"
                                 Style="{StaticResource CardStyle}">
                             <StackPanel>
-                                <Grid Margin="0,0,0,10">
+                                <TextBlock Text="Institution &amp; AcademicPolicy"
+                                           Style="{StaticResource SectionTextStyle}"
+                                           Margin="0,0,0,10" />
+
+                                <TextBlock Text="School / University Name" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
+                                <Grid Margin="0,0,0,12">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="8" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="AcademicPolicy"
-                                               Style="{StaticResource SectionTextStyle}" VerticalAlignment="Center" />
-                                    <Button Grid.Column="1" Content="Save Policy"
-                                            Style="{StaticResource PrimaryButtonStyle}"
-                                            Click="OnSavePolicyClick" />
+                                    <TextBox x:Name="InstitutionNameBox"
+                                             Grid.Column="0"
+                                             Style="{StaticResource FluentTextBoxStyle}" />
+                                    <Button Grid.Column="2"
+                                            Content="Save School"
+                                            Style="{StaticResource SecondaryButtonStyle}"
+                                            Click="OnSaveInstitutionClick" />
                                 </Grid>
 
                                 <Grid Margin="0,0,0,10">
@@ -212,15 +267,21 @@
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="0">
                                         <TextBlock Text="MinCredits" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
-                                        <TextBox x:Name="MinCreditsBox" Style="{StaticResource FluentTextBoxStyle}" />
+                                        <TextBox x:Name="MinCreditsBox"
+                                                 Style="{StaticResource FluentTextBoxStyle}"
+                                                 ToolTipService.InitialShowDelay="800"
+                                                 ToolTip="Advisory credit threshold shown as a warning on the student summary if not met." />
                                     </StackPanel>
                                     <StackPanel Grid.Column="2">
                                         <TextBlock Text="MaxCredits" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
-                                        <TextBox x:Name="MaxCreditsBox" Style="{StaticResource FluentTextBoxStyle}" />
+                                        <TextBox x:Name="MaxCreditsBox"
+                                                 Style="{StaticResource FluentTextBoxStyle}"
+                                                 ToolTipService.InitialShowDelay="800"
+                                                 ToolTip="Hard credit ceiling. Registration is blocked if adding a course exceeds MaxCredits." />
                                     </StackPanel>
                                 </Grid>
 
-                                <Grid>
+                                <Grid Margin="0,0,0,12">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="10" />
@@ -228,16 +289,77 @@
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="0">
                                         <TextBlock Text="RegistrationStart" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
-                                        <DatePicker x:Name="RegistrationStartPicker" Style="{StaticResource FluentDatePickerStyle}" />
+                                        <DatePicker x:Name="RegistrationStartPicker"
+                                                    Style="{StaticResource FluentDatePickerStyle}"
+                                                    ToolTipService.InitialShowDelay="800"
+                                                    ToolTip="First date students are permitted to register." />
                                     </StackPanel>
                                     <StackPanel Grid.Column="2">
                                         <TextBlock Text="RegistrationEnd" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
-                                        <DatePicker x:Name="RegistrationEndPicker" Style="{StaticResource FluentDatePickerStyle}" />
+                                        <DatePicker x:Name="RegistrationEndPicker"
+                                                    Style="{StaticResource FluentDatePickerStyle}"
+                                                    ToolTipService.InitialShowDelay="800"
+                                                    ToolTip="Closing date for student registrations (must be after RegistrationStart)." />
                                     </StackPanel>
                                 </Grid>
+
+                                <Button Content="Save Policy"
+                                        Style="{StaticResource PrimaryButtonStyle}"
+                                        HorizontalAlignment="Left"
+                                        Click="OnSavePolicyClick" />
                             </StackPanel>
                         </Border>
                     </Grid>
+
+                    <!-- Teachers Provisioning Card -->
+                    <Border x:Name="TeachersCard" Style="{StaticResource CardStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition x:Name="TeacherSplitGap" Width="16" />
+                                <ColumnDefinition x:Name="TeacherSplitRight" Width="1.2*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel x:Name="AddTeacherPanel" Grid.Row="0" Grid.Column="0">
+                                <TextBlock Text="Add Teacher"
+                                           Style="{StaticResource SectionTextStyle}"
+                                           Margin="0,0,0,10" />
+
+                                <TextBlock Text="Full Name" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
+                                <TextBox x:Name="TeacherFullNameBox" Style="{StaticResource FluentTextBoxStyle}" Margin="0,0,0,8" />
+
+                                <TextBlock Text="Username" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
+                                <TextBox x:Name="TeacherUsernameBox" Style="{StaticResource FluentTextBoxStyle}" Margin="0,0,0,8" />
+
+                                <TextBlock Text="Password" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4" />
+                                <PasswordBox x:Name="TeacherPasswordBox" Style="{StaticResource FluentPasswordBoxStyle}" Margin="0,0,0,12" />
+
+                                <Button Content="Add Teacher"
+                                        Style="{StaticResource PrimaryButtonStyle}"
+                                        HorizontalAlignment="Left"
+                                        ToolTipService.InitialShowDelay="800"
+                                        ToolTip="Provisions a new Teacher account directly into users.json."
+                                        Click="OnAddTeacherClick" />
+                            </StackPanel>
+
+                            <StackPanel x:Name="TeacherListPanel" Grid.Row="0" Grid.Column="2">
+                                <TextBlock Text="Registered Teachers"
+                                           Style="{StaticResource SectionTextStyle}"
+                                           Margin="0,0,0,10" />
+
+                                <DataGrid x:Name="TeachersGrid" Style="{StaticResource FluentDataGridStyle}">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="FullName" Binding="{Binding FullName}" Width="1.4*" FontWeight="SemiBold" />
+                                        <DataGridTextColumn Header="Username" Binding="{Binding Username}" Width="*" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
                 </StackPanel>
             </ScrollViewer>
         </Border>

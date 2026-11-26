@@ -128,9 +128,15 @@ Then complete system and acceptance testing on 1 December, video and PDF on 2–
 
 ## 9. Current state
 
-- Solution scaffold committed and pushed (Quorum.slnx; src/Quorum.Data, Quorum.Logic, Quorum.UI; tests/Quorum.Tests). Builds on .NET 10.
-- Template placeholder files (Class1.cs, UnitTest1.cs) still to be replaced.
-- Next: Increment 1 code (models, IDataStore, JsonDataStore, AuthService, tests); system-modelling diagrams; GitHub Issues; matriculation numbers.
+- **On `feat/ui-polish` (branching from `main` `9ee5673`):**
+  - Updated `Quorum.UI` + Figma (`https://www.figma.com/design/P2iXhyeWO3VTTAM2oZlScS`) + `docs/design/ui-spec.md`:
+    - Added `SplashView` (`1.3 s` brief splash with placeholder geometric logo).
+    - Added first-run `AdminSetupView` (School/University Name + primary Administrator provisioning into `IDataStore` when no Admin exists yet).
+    - Replaced tiny centered auth box with full-width split `AuthView` + fixed clipped `Login`/`Sign Up` `TabControl` tabs.
+    - Enabled automatic Windows system Light/Dark theme detection (`ThemeManager.ApplySystemTheme()`).
+    - Added manual `≡ Menu` collapsible sidebar toggles across `StudentView`, `TeacherView`, `AdminView`, plus `800 ms` hover `ToolTip`s (explaining `MinToRun`, `Capacity`, `Credits`, `Status`, and policy fields).
+    - Added `Institution Settings` (`School / University Name`) and `Add Teacher` + `Registered Teachers` grid inside `AdminView` (live-wired via `IQuorumGateway`).
+- **Remaining:** Implement Increment 2 (`CourseService`, `RegistrationService`, `PolicyService`, `CourseStatus`) in `Quorum.Logic`, align `SRS.md` / `Quorum.Data` / `Quorum.Logic` if Institution settings & Admin teacher provisioning are promoted into Logic, wire `QuorumGateway` to live Logic services, remove template `Class1.cs` files, expand tests (including JSON persistence tests), collect matriculation numbers, and record demo video + final PDF report.
 - Do not report an item as completed unless there is evidence.
 
 ## 10. Session log (append only)
@@ -153,3 +159,25 @@ Then complete system and acceptance testing on 1 December, video and PDF on 2–
 - **2026-11-21:** All UML diagrams accepted and stored in docs/design (use case, class A and B, three sequence diagrams, activity, architecture). Class diagram B method names are the locked Logic-layer contract. Next: Increment 1 code.
 
 - **2026-11-21:** Drafted `docs/requirements/SRS.md` and `docs/testing/test-plan.md` from Section 4 of this context and the accepted PlantUML diagrams in `docs/design`. Recorded the functional scope, service validation branches, credits 1–6, policy bounds, actor authorisation, duplicate-username and wrong-password cases, password hashing and JSON persistence. Test-plan Actual Result and Pass/Fail columns are intentionally blank pending real execution.
+
+- **2026-11-25:** Implemented the first coding increment and pushed the changes to `main` in three commits:
+  - `e1fb79a`: Added the `UserRole` enum with Student, Teacher and Administrator roles.
+  - `3de6547`: Added the data models: `User`, `Student`, `Course`, `Registration` and `AcademicPolicy`.
+  - `c068a1a`: Implemented `IDataStore`, `JsonDataStore`, `OperationResult`, `PasswordHasher`, `AuthService` and the `InMemoryDataStore` test fake.
+
+- **2026-11-25:** Current implementation details:
+  - Data models are located in `src/Quorum.Data/Models/`.
+  - `IDataStore` and `JsonDataStore` are located in `src/Quorum.Data/Storage/`.
+  - Authentication services are located in `src/Quorum.Logic/Services/`.
+  - Passwords are hashed using PBKDF2 with SHA-256, individual random salts, 600,000 iterations and 32-byte derived hashes.
+  - Student registration checks for duplicate usernames and matriculation numbers.
+  - Teacher registration checks for duplicate usernames.
+  - Login uses case-insensitive username matching and verifies password hashes.
+  - JSON persistence uses the user's Local Application Data directory under `Quorum`, with an optional custom directory for testing.
+  - Student records are deserialized as `Student` instances to preserve matriculation numbers.
+
+- **2026-11-25:** Authentication unit tests and an in-memory data store have been added. However, the test class `AuthServiceTests` is currently located at `tests/Quorum.Tests/Fakes/UnitTest1.cs`. It should be moved to `tests/Quorum.Tests/AuthServiceTests.cs`. The original `tests/Quorum.Tests/UnitTest1.cs` remains as an empty template and should be removed.
+
+- **2026-11-25:** Increment 1 implementation has been pushed, but completion is not yet verified. `dotnet test` has not been confirmed. Dedicated JSON persistence tests are still required. Administrator provisioning has also not been implemented.
+- **2026-11-26:** Built single-window Fluent WPF UI (`MainWindow` 1280x720, Light/Dark themes, responsive `< 960 px` views, `IQuorumGateway`), moved `AuthServiceTests` to `tests/Quorum.Tests/UnitTest1.cs`, added `.github/workflows/ci.yml` and `.github/workflows/release.yml`, verified `dotnet build` & `dotnet test` (`11 / 11` passed), and merged PR #1 into `main` (`132f9b6`).
+- **2026-11-26 (PM-approved UX & onboarding update on `feat/ui-polish`):** Added `SplashView`, first-run `AdminSetupView` (School/University Name + Administrator provisioning into `IDataStore`), split `AuthView` with unclipped `TabControl` tabs, Windows system theme auto-detection (`AppsUseLightTheme`), `≡ Menu` collapsible navigation rails, `800 ms` hover tooltips (explaining `MinToRun`, `Capacity`, `Credits`, `Status`, and policy fields), and `Institution Settings` + `Add Teacher` in `AdminView`. Synced Figma (`02 · Wireframes`, `03 · High Fidelity (Light)`, `04 · High Fidelity (Dark)`) and `docs/design/ui-spec.md`.

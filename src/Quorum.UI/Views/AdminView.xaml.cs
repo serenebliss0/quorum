@@ -12,24 +12,28 @@ public partial class AdminView : UserControl, IResponsiveView
     private readonly IQuorumGateway _gateway;
     private readonly User _currentUser;
     private readonly Action _onLogout;
+    private readonly Action<string> _onInstitutionUpdated;
+    private bool _isWindowCompact;
+    private bool _isUserCollapsed;
 
-    public AdminView(IQuorumGateway gateway, User currentUser, Action onLogout)
+    public AdminView(
+        IQuorumGateway gateway,
+        User currentUser,
+        Action onLogout,
+        Action<string> onInstitutionUpdated)
     {
         InitializeComponent();
         _gateway = gateway;
         _currentUser = currentUser;
         _onLogout = onLogout;
+        _onInstitutionUpdated = onInstitutionUpdated;
         LoadData();
     }
 
     public void SetCompactMode(bool isCompact)
     {
-        NavColumn.Width = new GridLength(isCompact ? 56 : 220);
-        Visibility labelVis = isCompact ? Visibility.Collapsed : Visibility.Visible;
-        CoursesNavLabel.Visibility = labelVis;
-        EnrolmentsNavLabel.Visibility = labelVis;
-        PolicyNavLabel.Visibility = labelVis;
-        LogoutLabel.Visibility = labelVis;
+        _isWindowCompact = isCompact;
+        ApplyRailState();
 
         if (isCompact)
         {
@@ -38,6 +42,12 @@ public partial class AdminView : UserControl, IResponsiveView
             Grid.SetRow(PolicyCard, 1);
             Grid.SetColumn(PolicyCard, 0);
             PolicyCard.Margin = new Thickness(0, 14, 0, 0);
+
+            TeacherSplitGap.Width = new GridLength(0);
+            TeacherSplitRight.Width = new GridLength(0);
+            Grid.SetRow(TeacherListPanel, 1);
+            Grid.SetColumn(TeacherListPanel, 0);
+            TeacherListPanel.Margin = new Thickness(0, 14, 0, 0);
         }
         else
         {
@@ -46,7 +56,32 @@ public partial class AdminView : UserControl, IResponsiveView
             Grid.SetRow(PolicyCard, 0);
             Grid.SetColumn(PolicyCard, 2);
             PolicyCard.Margin = new Thickness(0);
+
+            TeacherSplitGap.Width = new GridLength(16);
+            TeacherSplitRight.Width = new GridLength(1.2, GridUnitType.Star);
+            Grid.SetRow(TeacherListPanel, 0);
+            Grid.SetColumn(TeacherListPanel, 2);
+            TeacherListPanel.Margin = new Thickness(0);
         }
+    }
+
+    private void OnToggleNavClick(object sender, RoutedEventArgs e)
+    {
+        _isUserCollapsed = !_isUserCollapsed;
+        ApplyRailState();
+    }
+
+    private void ApplyRailState()
+    {
+        bool collapsed = _isWindowCompact || _isUserCollapsed;
+        NavColumn.Width = new GridLength(collapsed ? 56 : 220);
+        Visibility labelVis = collapsed ? Visibility.Collapsed : Visibility.Visible;
+        CollapseNavLabel.Visibility = labelVis;
+        CoursesNavLabel.Visibility = labelVis;
+        EnrolmentsNavLabel.Visibility = labelVis;
+        TeachersNavLabel.Visibility = labelVis;
+        PolicyNavLabel.Visibility = labelVis;
+        LogoutLabel.Visibility = labelVis;
     }
 
     private void LoadData()
@@ -60,6 +95,9 @@ public partial class AdminView : UserControl, IResponsiveView
             AllCoursesGrid.SelectedIndex = 0;
             CourseFilterCombo.SelectedIndex = 0;
         }
+
+        InstitutionNameBox.Text = _gateway.GetInstitutionName();
+        TeachersGrid.ItemsSource = _gateway.GetTeachers(_currentUser);
 
         AcademicPolicy policy = _gateway.GetPolicy();
         MinCreditsBox.Text = policy.MinCredits.ToString();
@@ -98,6 +136,34 @@ public partial class AdminView : UserControl, IResponsiveView
         OperationResult result = _gateway.UpdateCourseCredits(_currentUser, selected.Code, credits);
         ShowResult(result);
         if (result.IsSuccess) LoadData();
+    }
+
+    private void OnSaveInstitutionClick(object sender, RoutedEventArgs e)
+    {
+        OperationResult result = _gateway.SaveInstitutionName(_currentUser, InstitutionNameBox.Text);
+        ShowResult(result);
+        if (result.IsSuccess)
+        {
+            _onInstitutionUpdated(_gateway.GetInstitutionName());
+        }
+    }
+
+    private void OnAddTeacherClick(object sender, RoutedEventArgs e)
+    {
+        OperationResult result = _gateway.AddTeacherByAdmin(
+            _currentUser,
+            TeacherFullNameBox.Text,
+            TeacherUsernameBox.Text,
+            TeacherPasswordBox.Password);
+
+        ShowResult(result);
+        if (result.IsSuccess)
+        {
+            TeacherFullNameBox.Clear();
+            TeacherUsernameBox.Clear();
+            TeacherPasswordBox.Clear();
+            TeachersGrid.ItemsSource = _gateway.GetTeachers(_currentUser);
+        }
     }
 
     private void OnSavePolicyClick(object sender, RoutedEventArgs e)
@@ -141,9 +207,15 @@ public partial class AdminView : UserControl, IResponsiveView
         AllEnrolmentsCard.BringIntoView();
     }
 
-    private void OnSelectPolicyNav(object sender, RoutedEventArgs e)
+    private void OnSelectTeachersNav(object sender, RoutedEventArgs e)
     {
         SetActiveNav(2);
+        TeachersCard.BringIntoView();
+    }
+
+    private void OnSelectPolicyNav(object sender, RoutedEventArgs e)
+    {
+        SetActiveNav(3);
         PolicyCard.BringIntoView();
     }
 
@@ -158,8 +230,11 @@ public partial class AdminView : UserControl, IResponsiveView
         EnrolmentsNavBtn.Background = index == 1 ? surface : Brushes.Transparent;
         EnrolmentsIndicator.Background = index == 1 ? accent : Brushes.Transparent;
 
-        PolicyNavBtn.Background = index == 2 ? surface : Brushes.Transparent;
-        PolicyIndicator.Background = index == 2 ? accent : Brushes.Transparent;
+        TeachersNavBtn.Background = index == 2 ? surface : Brushes.Transparent;
+        TeachersIndicator.Background = index == 2 ? accent : Brushes.Transparent;
+
+        PolicyNavBtn.Background = index == 3 ? surface : Brushes.Transparent;
+        PolicyIndicator.Background = index == 3 ? accent : Brushes.Transparent;
     }
 
     private void OnLogoutClick(object sender, RoutedEventArgs e) => _onLogout();

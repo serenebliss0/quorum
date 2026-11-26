@@ -12,6 +12,8 @@ public partial class TeacherView : UserControl, IResponsiveView
     private readonly IQuorumGateway _gateway;
     private readonly User _currentUser;
     private readonly Action _onLogout;
+    private bool _isWindowCompact;
+    private bool _isUserCollapsed;
 
     public TeacherView(IQuorumGateway gateway, User currentUser, Action onLogout)
     {
@@ -24,12 +26,8 @@ public partial class TeacherView : UserControl, IResponsiveView
 
     public void SetCompactMode(bool isCompact)
     {
-        NavColumn.Width = new GridLength(isCompact ? 56 : 220);
-        Visibility labelVis = isCompact ? Visibility.Collapsed : Visibility.Visible;
-        CoursesNavLabel.Visibility = labelVis;
-        CreateNavLabel.Visibility = labelVis;
-        EnrolmentsNavLabel.Visibility = labelVis;
-        LogoutLabel.Visibility = labelVis;
+        _isWindowCompact = isCompact;
+        ApplyRailState();
 
         if (isCompact)
         {
@@ -47,6 +45,24 @@ public partial class TeacherView : UserControl, IResponsiveView
             Grid.SetColumn(EnrolmentsCard, 2);
             EnrolmentsCard.Margin = new Thickness(0);
         }
+    }
+
+    private void OnToggleNavClick(object sender, RoutedEventArgs e)
+    {
+        _isUserCollapsed = !_isUserCollapsed;
+        ApplyRailState();
+    }
+
+    private void ApplyRailState()
+    {
+        bool collapsed = _isWindowCompact || _isUserCollapsed;
+        NavColumn.Width = new GridLength(collapsed ? 56 : 220);
+        Visibility labelVis = collapsed ? Visibility.Collapsed : Visibility.Visible;
+        CollapseNavLabel.Visibility = labelVis;
+        CoursesNavLabel.Visibility = labelVis;
+        CreateNavLabel.Visibility = labelVis;
+        EnrolmentsNavLabel.Visibility = labelVis;
+        LogoutLabel.Visibility = labelVis;
     }
 
     private void RefreshCourses()

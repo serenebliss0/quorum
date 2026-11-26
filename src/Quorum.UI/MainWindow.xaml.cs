@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Threading;
 using Quorum.Data.Models;
 using Quorum.UI.Services;
 using Quorum.UI.Views;
@@ -6,44 +7,86 @@ using Quorum.UI.Views;
 namespace Quorum.UI;
 
 /// <summary>
-/// Single-window Fluent shell hosting Auth, Student, Teacher, and Admin views.
+/// Single-window Fluent shell hosting Splash, First-Run Admin Setup, Auth, Student, Teacher, and Admin views.
 /// </summary>
 public partial class MainWindow : Window
 {
     private const double CompactBreakpoint = 960;
     private readonly IQuorumGateway _gateway = new QuorumGateway();
+    private User? _activeUser;
 
     public MainWindow()
     {
         InitializeComponent();
-        ShowAuthView();
+        SyncThemeButtonLabel();
+        ShowSplashThenRoute();
+    }
+
+    private void ShowSplashThenRoute()
+    {
+        TitleHeaderText.Text = "Quorum";
+        ViewHost.Content = new SplashView();
+
+        var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1300) };
+        timer.Tick += (_, _) =>
+        {
+            timer.Stop();
+            if (_gateway.HasAdminAccount())
+                ShowAuthView();
+            else
+                ShowAdminSetupView();
+        };
+        timer.Start();
+    }
+
+    private void ShowAdminSetupView()
+    {
+        _activeUser = null;
+        TitleHeaderText.Text = "Quorum  ·  Institution & Admin Setup";
+        ViewHost.Content = new AdminSetupView(_gateway, OnAuthenticated, ShowAuthView);
+        ApplyResponsiveState();
     }
 
     private void ShowAuthView()
     {
-        TitleHeaderText.Text = "Quorum  ·  Sign In";
-        var authView = new AuthView(_gateway, OnAuthenticated, title => TitleHeaderText.Text = title);
-        ViewHost.Content = authView;
+        _activeUser = null;
+        TitleHeaderText.Text = $"Quorum  ·  {_gateway.GetInstitutionName()}  ·  Sign In";
+        ViewHost.Content = new AuthView(
+            _gateway,
+            OnAuthenticated,
+            title => TitleHeaderText.Text = title,
+            ShowAdminSetupView);
         ApplyResponsiveState();
     }
 
     private void OnAuthenticated(User user)
     {
+        _activeUser = user;
+        string inst = _gateway.GetInstitutionName();
+
         switch (user.Role)
         {
             case UserRole.Student:
-                TitleHeaderText.Text = $"Quorum  ·  Student ({user.FullName})";
+                TitleHeaderText.Text = $"Quorum  ·  {inst}  ·  Student ({user.FullName})";
                 ViewHost.Content = new StudentView(_gateway, user, ShowAuthView);
                 break;
 
             case UserRole.Teacher:
-                TitleHeaderText.Text = $"Quorum  ·  Teacher ({user.FullName})";
+                TitleHeaderText.Text = $"Quorum  ·  {inst}  ·  Teacher ({user.FullName})";
                 ViewHost.Content = new TeacherView(_gateway, user, ShowAuthView);
                 break;
 
             case UserRole.Administrator:
-                TitleHeaderText.Text = $"Quorum  ·  Administrator ({user.FullName})";
-                ViewHost.Content = new AdminView(_gateway, user, ShowAuthView);
+                TitleHeaderText.Text = $"Quorum  ·  {inst}  ·  Administrator ({user.FullName})";
+                ViewHost.Content = new AdminView(
+                    _gateway,
+                    user,
+                    ShowAuthView,
+                    newInst =>
+                    {
+                        if (_activeUser is not null)
+                            TitleHeaderText.Text = $"Quorum  ·  {newInst}  ·  Administrator ({_activeUser.FullName})";
+                    });
                 break;
         }
 
@@ -51,9 +94,7 @@ public partial class MainWindow : Window
     }
 
     private void OnWindowSizeChanged(object sender, SizeChangedEventArgs e)
-    {
-        ApplyResponsiveState();
-    }
+        => ApplyResponsiveState();
 
     private void ApplyResponsiveState()
     {
@@ -66,10 +107,12 @@ public partial class MainWindow : Window
 
     private void OnToggleThemeClick(object sender, RoutedEventArgs e)
     {
-        bool nextDark = !ThemeManager.IsDarkMode;
-        ThemeManager.ApplyTheme(nextDark);
-        ThemeToggleButton.Content = nextDark ? "Light" : "Dark";
+        ThemeManager.ApplyTheme(!ThemeManager.IsDarkMode);
+        SyncThemeButtonLabel();
     }
+
+    private void SyncThemeButtonLabel()
+        => ThemeToggleButton.Content = ThemeManager.IsDarkMode ? "Light" : "Dark";
 
     private void OnMinimizeClick(object sender, RoutedEventArgs e)
         => WindowState = WindowState.Minimized;

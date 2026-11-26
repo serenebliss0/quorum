@@ -12,6 +12,8 @@ public partial class StudentView : UserControl, IResponsiveView
     private readonly IQuorumGateway _gateway;
     private readonly User _currentUser;
     private readonly Action _onLogout;
+    private bool _isWindowCompact;
+    private bool _isUserCollapsed;
 
     public StudentView(IQuorumGateway gateway, User currentUser, Action onLogout)
     {
@@ -24,8 +26,22 @@ public partial class StudentView : UserControl, IResponsiveView
 
     public void SetCompactMode(bool isCompact)
     {
-        NavColumn.Width = new GridLength(isCompact ? 56 : 220);
-        Visibility labelVis = isCompact ? Visibility.Collapsed : Visibility.Visible;
+        _isWindowCompact = isCompact;
+        ApplyRailState();
+    }
+
+    private void OnToggleNavClick(object sender, RoutedEventArgs e)
+    {
+        _isUserCollapsed = !_isUserCollapsed;
+        ApplyRailState();
+    }
+
+    private void ApplyRailState()
+    {
+        bool collapsed = _isWindowCompact || _isUserCollapsed;
+        NavColumn.Width = new GridLength(collapsed ? 56 : 220);
+        Visibility labelVis = collapsed ? Visibility.Collapsed : Visibility.Visible;
+        CollapseNavLabel.Visibility = labelVis;
         BrowseNavLabel.Visibility = labelVis;
         MyCoursesNavLabel.Visibility = labelVis;
         LogoutLabel.Visibility = labelVis;
